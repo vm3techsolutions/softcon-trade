@@ -3,8 +3,8 @@ import { FaMapMarkerAlt, FaEnvelope, FaPhone } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-white text-gray-800 border-t border-gray-200">
-      <div className=" mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+    <footer className="bg-white text-gray-800 border-t border-gray-400">
+      <div className=" mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-8">
         {/* Logo Image */}
         <div>
           <img
@@ -87,15 +87,15 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold text-[#044E78] mb-4 text-xl">Contact Us</h3>
           <ul className="space-y-3 text-sm text-gray-700">
-            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-yellow-500" /> Pune</li>
-            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-yellow-500" /> Mumbai</li>
-            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-yellow-500" /> Bangalore</li>
+            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-[#FFB703]" /> Pune</li>
+            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-[#FFB703]" /> Mumbai</li>
+            <li className="flex items-center gap-2"><FaMapMarkerAlt className="text-[#FFB703]" /> Bangalore</li>
             <li className="flex items-center gap-2">
-              <FaEnvelope className="text-yellow-500" />
+              <FaEnvelope className="text-[#FFB703]" />
               <a href="mailto:sales@softcon.net.in">sales@softcon.net.in</a>
             </li>
             <li className="flex items-center gap-2">
-              <FaPhone className="text-yellow-500" />
+              <FaPhone className="text-[#FFB703]" />
               <a href="tel:+918888825314">+91-8888825314 / 15</a>
             </li>
           </ul>

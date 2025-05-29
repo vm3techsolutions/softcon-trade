@@ -61,12 +61,12 @@ export default function MicroControlSystems() {
       <div className="flex gap-2">
         <Link
           href={product.link}
-          className="bg-[#FFB703] text-white text-sm px-4 py-1 rounded-2xl inline-block"
+          className="bg-[#FFB703] text-white text-sm sm:px-4 px-1 py-1 rounded-2xl inline-block"
         >
           Know More
         </Link>
 
-        <button className="bg-[#FFB703] text-white text-sm px-4 py-1 rounded-2xl flex items-center gap-1">
+        <button className="bg-[#FFB703] text-white text-sm sm:px-4 px-1 py-1 rounded-2xl flex items-center gap-1">
           Add to Cart <FaShoppingCart />
         </button>
       </div>
@@ -77,7 +77,7 @@ export default function MicroControlSystems() {
     <div className="px-4 pb-8">
       {/* Micro Control Systems */}
       <h1 className="text-3xl font-bold text-center mb-8">Micro Control Systems</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {microProducts.map(renderProductCard)}
       </div>
 
@@ -92,7 +92,7 @@ export default function MicroControlSystems() {
 
       {/* Small Control Systems */}
       <h1 className="text-3xl font-bold text-center my-8 pt-6">Small Control Systems</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {smallProducts.map(renderProductCard)}
       </div>
 

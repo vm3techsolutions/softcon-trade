@@ -43,45 +43,44 @@ export default function MicroControlComponent() {
 
   return (
     <section>
-    <div className="flex flex-col md:flex-row p-8">
-      {/* Sidebar */}
-      <div className="w-full md:w-1/5 bg-white p-4 border shadow-md rounded-xl">
-        <ul className="space-y-3">
-          {categories.map((category) => (
-            <li key={category} className="border-b border-gray-300">
-              <button
-                onClick={() => setActive(category)}
-                className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] ${
-                  active === category ? "text-yellow-400" : "bg-white hover:bg-gray-100"
-                }`}
-              >
-                {category}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Right side content */}
-      <div className="w-full md:w-4/5 pl-10">
-        <div className="w-full h-[350px] relative overflow-hidden shadow-lg">
-          <Image
-            src="/assets/Sidebar-right.png"
-            alt="Industrial Automation"
-            layout="fill"
-            objectFit="cover"
-          />
+      <div className="flex flex-col-reverse md:flex-row p-4 md:p-8 gap-4">
+        {/* Sidebar - Goes below image on mobile */}
+        <div className="w-full md:w-1/5 bg-white p-4 border shadow-md rounded-xl">
+          <ul className="space-y-3">
+            {categories.map((category) => (
+              <li key={category} className="border-b border-gray-300">
+                <button
+                  onClick={() => setActive(category)}
+                  className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] ${
+                    active === category
+                      ? "text-yellow-400"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  {category}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
 
-       
-        
-      </div>
-    </div>
-
-     {/* Dynamic Component */}
-        <div className="mt-6 p-6 bg-white shadow-lg rounded-lg">
-          {renderComponent()}
+        {/* Image Section */}
+        <div className="w-full md:w-4/5 sm:pl-10">
+          <div className="w-full h-[200px] md:h-[350px] relative overflow-hidden shadow-lg ">
+            <Image
+              src="/assets/Sidebar-right.png"
+              alt="Industrial Automation"
+              layout="fill"
+              objectFit="cover"
+            />
+          </div>
         </div>
+      </div>
+
+      {/* Dynamic Component */}
+      <div className="mt-6 p-6 bg-white shadow-lg rounded-lg">
+        {renderComponent()}
+      </div>
     </section>
   );
 }
