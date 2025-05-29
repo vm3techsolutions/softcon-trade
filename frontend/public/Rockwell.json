@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "category": "micro",
+    "title": "Allen-Bradley Micro810 Programmable Logic Controller Systems",
+    "description": "With a nano-sized footprint, our Bulletin 2080 Micro810 programmable logic controllers (PLC) function as smart relays..........",
+    "price": 400,
+    "image": "/assets/Rockwell1.png",
+    "link": "/products/micro810"
+  },
+  {
+    "id": 2,
+    "category": "micro",
+    "title": "Allen-Bradley Micro820 Programmable Logic Controller Systems",
+    "description": "Our Micro820 programmable logic controllers (PLC) include a nano-sized footprint and are designed for small standalone machine control and remote....",
+    "price": 400,
+    "image": "/assets/Rockwell2.png",
+    "link": "/products/micro820"
+  },
+  {
+    "id": 3,
+    "category": "micro",
+    "title": "Allen-Bradley Micro850 Programmable Logic Controller Systems",
+    "description": "Our Bulletin 2080 Micro850 programmable logic controllers (PLC) are designed for larger standalone machine control applications..........",
+    "price": 400,
+    "image": "/assets/Rockwell3.png",
+    "link": "/products/micro850"
+  },
+  {
+    "id": 4,
+    "category": "micro",
+    "title": "Allen-Bradley MicroLogix 1400 Programmable Logic Controller Systems",
+    "description": "Our Bulletin 1766 MicroLogix 1400 Programmable Logic Controller Systems build upon critical MicroLogix 1100 features: EtherNet/IP, on-line editing .......",
+    "price": 400,
+    "image": "/assets/Rockwell4.png",
+    "link": "/products/micrologix1400"
+  },
+  {
+    "id": 5,
+    "category": "small",
+    "title": "Allen-Bradley Small Control System A",
+    "description": "Compact small control system suitable for small automation tasks...",
+    "price": 300,
+    "image": "/assets/RockwellS1.png",
+    "link": "/products/smallcontrol1"
+  },
+  {
+    "id": 6,
+    "category": "small",
+    "title": "Allen-Bradley Small Control System B",
+    "description": "Reliable and efficient control system for small machines...",
+    "price": 320,
+    "image": "/assets/RockwellS2.png",
+    "link": "/products/smallcontrol2"
+  },
+  {
+    "id": 7,
+    "category": "small",
+    "title": "Allen-Bradley Small Control System C",
+    "description": "Small PLC designed for simple automation requirements...",
+    "price": 310,
+    "image": "/assets/RockwellS3.png",
+    "link": "/products/smallcontrol3"
+  },
+  {
+    "id": 8,
+    "category": "small",
+    "title": "Allen-Bradley Small Control System D",
+    "description": "Affordable and compact controller for small applications...",
+    "price": 290,
+    "image": "/assets/RockwellS4.png",
+    "link": "/products/smallcontrol4"
+  }
+]
