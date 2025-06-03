@@ -59,6 +59,7 @@ export default function MicroControlSystems() {
       <div className="font-bold mb-3">Price : $ {product.price}</div>
 
       <div className="flex gap-2">
+        
         <Link
           href={product.link}
           className="bg-[#FFB703] text-white text-sm sm:px-4 px-1 py-1 rounded-2xl inline-block"

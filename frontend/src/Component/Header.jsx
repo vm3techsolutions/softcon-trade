@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { Mail, Phone, Search, User, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import Image from "next/image";
@@ -64,18 +65,24 @@ export default function Header() {
             menuOpen ? "flex" : "hidden"
           } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
         >
-          <a href="#">Technical Support</a>
-          <a href="#">How to Buy</a>
-          <a href="#">Contact</a>
-          <a href="#">Chat with Us</a>
+          <Link href="#">Technical Support</Link>
+          <Link href="#">How to Buy</Link>
+          <Link href="#">Contact</Link>
+          <Link href="#">Chat with Us</Link>
         </nav>
 
         {/* Icons */}
-        <div className="flex space-x-4 text-[#FFB703] justify-end">
-          <User className="w-5 h-5 cursor-pointer" />
-          <Heart className="w-5 h-5 cursor-pointer" />
-          <ShoppingCart className="w-5 h-5 cursor-pointer" />
-        </div>
+       <div className="flex space-x-4 text-[#FFB703] justify-end">
+  <Link href="/profile">
+    <User className="w-5 h-5 cursor-pointer" />
+  </Link>
+  <Link href="/wishlist">
+    <Heart className="w-5 h-5 cursor-pointer" />
+  </Link>
+  <Link href="/cart">
+    <ShoppingCart className="w-5 h-5 cursor-pointer" />
+  </Link>
+</div>
       </div>
     </header>
   );
