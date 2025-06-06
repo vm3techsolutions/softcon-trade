@@ -51,7 +51,7 @@ export default function Footer() {
           <h3 className="font-semibold text-[#044E78] mb-4 text-xl">Products</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link href="/products/rockwell-automation" className="hover:text-[#044E78]">
+              <Link href="/categories/Rockwel.js" className="hover:text-[#044E78]">
                 Rockwell Automation
               </Link>
             </li>
