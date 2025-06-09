@@ -6,10 +6,12 @@ import Link from "next/link";
 const SignupForm = () => {
   const [formData, setFormData] = useState({
     name: "",
-    mobile: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    mobile: "",
+    address: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -22,49 +24,62 @@ const SignupForm = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.username.trim()) newErrors.username = "Username is required";
 
-    if (!/^\d{10}$/.test(formData.mobile)) {
+    if (!/^\d{10}$/.test(formData.mobile))
       newErrors.mobile = "Enter a valid 10-digit mobile number";
-    }
 
-    if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(formData.email)) {
+    if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(formData.email))
       newErrors.email = "Enter a valid email address";
-    }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
-      newErrors.password = "Password must include at least one special character";
-    }
+    else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password))
+      newErrors.password = "Password must include a special character";
 
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
-    }
+
+    if (!formData.address.trim()) newErrors.address = "Address is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
     const { confirmPassword, ...dataToSend } = formData;
-    console.log("Signup Data:", dataToSend);
 
-    alert("Signup successful!");
+    try {
+      const res = await fetch("http://localhost:5000/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
 
-    setFormData({
-      name: "",
-      mobile: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
+      const result = await res.json();
+      if (res.ok) {
+        alert("Signup successful!");
+        setFormData({
+          name: "",
+          username: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          mobile: "",
+          address: "",
+        });
+      } else {
+        alert(result.message || "Signup failed");
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again later.");
+      console.error(error);
+    }
   };
 
   return (
@@ -75,66 +90,36 @@ const SignupForm = () => {
     >
       <h2 className="text-2xl font-bold text-center">Sign Up</h2>
 
-      <div>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-      </div>
+      {[
+        { name: "name", type: "text", placeholder: "Name" },
+        { name: "username", type: "text", placeholder: "Username" },
+        { name: "email", type: "email", placeholder: "Email" },
+        { name: "mobile", type: "text", placeholder: "Mobile Number" },
+        { name: "password", type: "password", placeholder: "Password" },
+        { name: "confirmPassword", type: "password", placeholder: "Confirm Password" },
+      ].map(({ name, type, placeholder }) => (
+        <div key={name}>
+          <input
+            type={type}
+            name={name}
+            placeholder={placeholder}
+            value={formData[name]}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+          {errors[name] && <p className="text-red-500 text-sm">{errors[name]}</p>}
+        </div>
+      ))}
 
       <div>
-        <input
-          type="text"
-          name="mobile"
-          placeholder="Mobile Number"
-          value={formData.mobile}
+        <textarea
+          name="address"
+          placeholder="Address"
+          value={formData.address}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
-        {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
-      </div>
-
-      <div>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-      </div>
-
-      <div>
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-      </div>
-
-      <div>
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-        />
-        {errors.confirmPassword && (
-          <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
-        )}
+        {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
       </div>
 
       <button
