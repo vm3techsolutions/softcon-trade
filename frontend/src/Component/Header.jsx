@@ -108,7 +108,7 @@ export default function Header() {
                     Hi, {user.name}
                   </p>
                   <Link
-                    href="/Dashboard"
+                    href="/dashboard"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     My Account
