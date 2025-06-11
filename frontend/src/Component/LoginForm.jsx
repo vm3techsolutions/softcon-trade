@@ -2,51 +2,65 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/app/store/authSlice";
+import { loginUser } from "@/app/api/authApi"; // 👈 import Axios login method
 
 const LoginForm = () => {
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-  });
+  const router = useRouter();
+  const dispatch = useDispatch();
 
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
 
   const handleChange = (e) => {
     setLoginData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
+    setServerError("");
   };
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(loginData.email)) {
       newErrors.email = "Enter a valid email address";
     }
-
     if (loginData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(loginData.password)) {
       newErrors.password = "Password must include at least one special character";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    console.log("Login Data:", loginData);
-    // TODO: backend API call here
+    try {
+      const data = await loginUser(loginData.email, loginData.password);
+      localStorage.setItem("token", data.token);
+      dispatch(loginSuccess({ user: data.user, token: data.token }));
+      router.push("/dashboard");
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Login failed. Try again.";
+      setServerError(message);
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-10 bg-white  space-y-4  border my-10"
+      className="max-w-md mx-auto p-10 bg-white border my-10 space-y-4"
     >
       <h2 className="text-2xl font-bold text-center">Login</h2>
+
+      {serverError && (
+        <p className="text-red-600 text-sm text-center">{serverError}</p>
+      )}
 
       <div>
         <input
@@ -56,6 +70,7 @@ const LoginForm = () => {
           value={loginData.email}
           onChange={handleChange}
           className="w-full p-2 border rounded"
+          required
         />
         {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
       </div>
@@ -68,8 +83,11 @@ const LoginForm = () => {
           value={loginData.password}
           onChange={handleChange}
           className="w-full p-2 border rounded"
+          required
         />
-        {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+        {errors.password && (
+          <p className="text-red-500 text-sm">{errors.password}</p>
+        )}
       </div>
 
       <button

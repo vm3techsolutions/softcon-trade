@@ -2,8 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { signupSuccess } from "@/app/store/authSlice";
+import { signupUser } from "@/app/api/authApi"; // adjust the path if needed
+import { useRouter } from "next/navigation";
 
 const SignupForm = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -15,6 +22,7 @@ const SignupForm = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,36 +57,22 @@ const SignupForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     const { confirmPassword, ...dataToSend } = formData;
 
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        alert("Signup successful!");
-        setFormData({
-          name: "",
-          username: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-          mobile: "",
-          address: "",
-        });
-      } else {
-        alert(result.message || "Signup failed");
-      }
+      const result = await signupUser(dataToSend); // calling API from authApi.js
+      dispatch(signupSuccess({ user: result.user, token: result.token }));
+      alert("Signup successful!");
+      router.push("/dashboard"); // redirect after signup
     } catch (error) {
-      alert("Something went wrong. Please try again later.");
-      console.error(error);
+      const msg =
+        error?.response?.data?.message || "Signup failed. Please try again.";
+      alert(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,9 +118,12 @@ const SignupForm = () => {
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300"
+        disabled={loading}
+        className={`w-full ${
+          loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+        } text-white py-2 rounded transition duration-300`}
       >
-        Sign Up
+        {loading ? "Signing Up..." : "Sign Up"}
       </button>
 
       <p className="text-center text-sm mt-4">
