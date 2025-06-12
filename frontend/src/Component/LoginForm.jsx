@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/app/store/authSlice";
-import { loginUser } from "@/app/api/authApi"; // 👈 import Axios login method
+import axiosInstance from "@/app/api/axiosInstance";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -40,9 +40,14 @@ const LoginForm = () => {
     if (!validateForm()) return;
 
     try {
-      const data = await loginUser(loginData.email, loginData.password);
-      localStorage.setItem("token", data.token);
-      dispatch(loginSuccess({ user: data.user, token: data.token }));
+      const res = await axiosInstance.post("/login", {
+  email: loginData.email,
+  password: loginData.password,
+});
+
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      dispatch(loginSuccess({ user, token }));
       router.push("/dashboard");
     } catch (error) {
       const message =

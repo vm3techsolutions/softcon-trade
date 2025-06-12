@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { signupSuccess } from "@/app/store/authSlice";
-import { signupUser } from "@/app/api/authApi"; // adjust the path if needed
 import { useRouter } from "next/navigation";
+import axios from "axios"; // <--- axios imported
 
 const SignupForm = () => {
   const dispatch = useDispatch();
@@ -63,10 +63,16 @@ const SignupForm = () => {
 
     setLoading(true);
     try {
-      const result = await signupUser(dataToSend); // calling API from authApi.js
+      const response = await axios.post(
+  `${process.env.NEXT_PUBLIC_BACKEND_URL}/signup`,
+  dataToSend
+);
+
+      const result = response.data;
       dispatch(signupSuccess({ user: result.user, token: result.token }));
+      localStorage.setItem("token", result.token); 
       alert("Signup successful!");
-      router.push("/dashboard"); // redirect after signup
+      router.push("/dashboard");
     } catch (error) {
       const msg =
         error?.response?.data?.message || "Signup failed. Please try again.";

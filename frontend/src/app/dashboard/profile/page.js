@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import api from '@/app/api/api';
+import api from '@/app/api/axiosInstance';
 import AccountSetting from '@/Component/AccountSetting';
 
 const Profile = () => {
