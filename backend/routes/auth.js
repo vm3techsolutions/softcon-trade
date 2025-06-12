@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
 
 // Signup Route
 router.post('/signup', async (req, res) => {
@@ -60,15 +60,16 @@ router.post('/signup', async (req, res) => {
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  // Check for required fields
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password required" });
   }
 
-  // Check if user exists
   const sql = "SELECT * FROM users WHERE email = ?";
   db.query(sql, [email], async (err, results) => {
-    if (err) return res.status(500).json({ message: "Database error" });
+    if (err) {
+      console.error("Database error during login:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
 
     if (results.length === 0) {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -76,36 +77,40 @@ router.post("/login", (req, res) => {
 
     const user = results[0];
 
-    // Compare hashed password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Generate JWT
-    const token = jwt.sign(
-      {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    try {
+      const token = jwt.sign(
+        {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
 
-    return res.status(200).json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        mobile: user.mobile,
-        address: user.address,
-      },
-    });
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          mobile: user.mobile,
+          address: user.address,
+        },
+      });
+    } catch (jwtError) {
+      console.error("JWT error:", jwtError);
+      return res.status(500).json({ message: "Token generation failed" });
+    }
   });
 });
+
 
 module.exports = router;
