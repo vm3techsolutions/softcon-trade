@@ -40,7 +40,7 @@ const LoginForm = () => {
     if (!validateForm()) return;
 
     try {
-      const res = await axiosInstance.post("/login", {
+      const res = await axiosInstance.post("/api/user/login", {
   email: loginData.email,
   password: loginData.password,
 });
