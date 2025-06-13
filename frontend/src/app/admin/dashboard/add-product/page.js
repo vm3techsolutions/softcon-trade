@@ -3,8 +3,7 @@
 import { useState } from "react";
 import axiosInstance from "@/app/api/axiosInstance";
 import { useRouter } from "next/navigation";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import TiptapEditor from "./TipTapEditor"; // adjust path as needed
 
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
@@ -16,19 +15,8 @@ const AddProductForm = () => {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const router = useRouter();
-
-  // Setup Tiptap editor for rich text
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "<p>Hello World</p>",
-    onUpdate: ({ editor }) => {
-      // Save editor HTML content in formData
-      setDescription(editor.getHTML());
-    },
-  });
-
   const [description, setDescription] = useState("");
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,10 +77,8 @@ const AddProductForm = () => {
         required
       />
 
-      {/* Description field using Tiptap */}
-      <div className="w-full border p-2 min-h-[150px]">
-        <EditorContent editor={editor} />
-      </div>
+      {/* Use custom Tiptap editor */}
+      <TiptapEditor onChange={(value) => setDescription(value)} />
 
       <input
         type="number"
