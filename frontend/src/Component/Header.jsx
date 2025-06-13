@@ -105,7 +105,7 @@ export default function Header() {
               {dropdownOpen && (
                 <div className="absolute right-0 w-48 bg-white border rounded-lg shadow-lg text-black py-2 z-50">
                   <p className="px-4 py-2 font-medium border-b">
-                    Hi, {user.name}
+                    Hi, {user?.name || "Guest"}
                   </p>
                   <Link
                     href="/dashboard"

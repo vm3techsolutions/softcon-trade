@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const connection = mysql.createConnection({
   host: 'localhost',         // or 127.0.0.1
   user: 'root',              // your MySQL username
-  password: 'root',              // your MySQL password (empty if not set)
+  password: '',              // your MySQL password (empty if not set)
   database: 'softcon_trade'  // replace with your DB name
 });
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import api from '@/app/api/axiosInstance';
+import axiosInstance from '@/app/api/axiosInstance';
+import { PencilIcon, SaveIcon, XIcon, ClipboardCopyIcon } from 'lucide-react';
 import AccountSetting from '@/Component/AccountSetting';
 
 const Profile = () => {
@@ -22,22 +23,20 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!user?.id) {
-        console.warn('No user ID available.');
-        return;
-      }
+      if (!user?.id) return;
 
       try {
-        const res = await api.get(`/user/${user.id}`);
+        const res = await axiosInstance.get(`/api/user/getData/${user.id}`);
         console.log('User data:', res.data);
 
-        if (res.data) {
+        if (res.data?.user) {
+          const { name, username, email, mobile, address } = res.data.user;
           const updated = {
-            name: res.data.name || '',
-            username: res.data.username || '',
-            email: res.data.email || '',
-            mobile: res.data.mobile || '',
-            address: res.data.address || '',
+            name: name || '',
+            username: username || '',
+            email: email || '',
+            mobile: mobile || '',
+            address: address || '',
           };
 
           setUserData(updated);
@@ -60,9 +59,8 @@ const Profile = () => {
 
   const handleSave = async () => {
     if (!user?.id) return alert('User not authenticated');
-
     try {
-      await api.put(`/user/${user.id}`, userData);
+      await axiosInstance.put(`/api/user/getData/${user.id}`, userData);
       alert('Profile updated successfully!');
       setEditing(false);
       setOriginalData(userData);
@@ -73,10 +71,16 @@ const Profile = () => {
   };
 
   const handleCancel = () => {
-    if (originalData) {
-      setUserData(originalData);
-    }
+    setUserData(originalData);
     setEditing(false);
+  };
+
+  const handleCopyText = () => {
+    const plainText = Object.entries(userData)
+      .map(([key, value]) => `${key.toUpperCase()}: ${value || '-'}`)
+      .join('\n');
+    navigator.clipboard.writeText(plainText);
+    alert('Profile info copied as plain text!');
   };
 
   if (!isAuthenticated) {
@@ -93,67 +97,95 @@ const Profile = () => {
     );
   }
 
-  return (
-    <div className="max-w-2xl mx-auto space-y-6 p-4 bg-gray-50 rounded shadow">
-      <h2 className="text-2xl font-semibold text-gray-800">Profile Information</h2>
-
-      {Object.entries(userData).map(([key, value]) => (
-        <div key={key}>
-          <label className="block font-medium capitalize mb-1 text-gray-700">
-            {key}
-          </label>
-          {!editing ? (
-            <p className="p-2 bg-white border rounded text-gray-700">
-              {value || '-'}
-            </p>
-          ) : key === 'address' ? (
-            <textarea
-              name={key}
-              value={value}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-          ) : (
-            <input
-              type="text"
-              name={key}
-              value={value}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+ return (
+  <>
+    <div className="flex flex-col lg:flex-row gap-6 px-4 py-6">
+      {/* Profile Section - wider */}
+      <div className="w-full lg:w-2/3 bg-white shadow-lg rounded-2xl p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-semibold text-gray-800">Profile</h2>
+          {!editing && (
+            <button
+              onClick={() => setEditing(true)}
+              className="text-blue-600 hover:text-blue-800"
+              title="Edit Profile"
+            >
+              <PencilIcon className="w-6 h-6" />
+            </button>
           )}
         </div>
-      ))}
 
-      {!editing ? (
-        <button
-          onClick={() => setEditing(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Edit
-        </button>
-      ) : (
-        <div className="flex gap-4">
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Save
-          </button>
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
+        <div className="space-y-4">
+          {Object.entries(userData).map(([key, value]) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-600 capitalize mb-1">
+                {key}
+              </label>
+              {editing ? (
+                key === 'address' ? (
+                  <textarea
+                    name={key}
+                    value={value}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full p-2 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    name={key}
+                    value={value}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                )
+              ) : (
+                <div className="bg-gray-100 p-3 rounded text-gray-800">
+                  {value || '-'}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      )}
 
-      <hr className="my-6 border-gray-300" />
+        <div className="mt-6 flex gap-4">
+          {editing ? (
+            <>
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                <SaveIcon className="w-4 h-4" />
+                Save
+              </button>
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                <XIcon className="w-4 h-4" />
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleCopyText}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            >
+              <ClipboardCopyIcon className="w-4 h-4" />
+              Copy Plain Text
+            </button>
+          )}
+        </div>
+      </div>
 
-      {user?.id && <AccountSetting userId={user.id} />}
+      {/* Account Setting Section - narrower */}
+      <div className="w-full lg:w-1/3 bg-white shadow-lg rounded-2xl p-6">
+        {user?.id && <AccountSetting userId={user.id} />}
+      </div>
     </div>
-  );
+  </>
+);
+
 };
 
 export default Profile;
