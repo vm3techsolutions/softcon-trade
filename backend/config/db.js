@@ -1,15 +1,15 @@
-// db.js
+
 const mysql = require('mysql2');
 
-const connection = mysql.createConnection({
-  host: 'localhost',         // or 127.0.0.1
-  user: 'root',              // your MySQL username
-  password: '' || 'root',              // your MySQL password (empty if not set)
-  database: 'softcon_trade'  // replace with your DB name
+const db = mysql.createConnection({
+  host: process.env.DB_HOST || 'localhost',         // or 127.0.0.1
+  user: process.env.DB_USER || '',              // your MySQL username
+  password: process.env.DB_PASSWORD ,              // your MySQL password (empty if not set)
+  database: process.env.DB_NAME || 'softcon_trade'  // replace with your DB name
 });
 
 // Connect to MySQL
-connection.connect((err) => {
+db.connect((err) => {
   if (err) {
     console.error('Database connection failed:', err);
   } else {
@@ -17,4 +17,15 @@ connection.connect((err) => {
   }
 });
 
-module.exports = connection;
+module.exports = db;
+
+
+//=============================
+// const mysql = require('mysql2/promise'); // ✅ use promise version
+// const db = mysql.createPool({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+// });
+// module.exports = db;
