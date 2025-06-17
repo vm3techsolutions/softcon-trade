@@ -1,14 +1,14 @@
 const db = require("../../config/db");
-// getCategories.js
-const getCategories= async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM categories");
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch categories" });
-  }
-};
 
+const getCategories = (req, res) => {
+  db.query("SELECT * FROM categories", (err, results) => {
+    if (err) {
+      console.error("Query error:", err);
+      return res.status(500).json({ error: "Failed to fetch categories" });
+    }
+    res.json(results);
+  });
+};
 
 module.exports = {
   getCategories
