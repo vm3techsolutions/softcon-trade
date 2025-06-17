@@ -1,21 +1,37 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import axiosInstance from "@/app/api/axiosInstance";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '@/app/api/axiosInstance';
 
 const AddProductForm = () => {
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    price: "",
-    stock: "",
-    category: "",
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    category_id: '',
+    subcategory_id: '',
+    category: '',
   });
-
   const [imageFile, setImageFile] = useState(null);
-  const [description, setDescription] = useState("");
-  const router = useRouter();
+
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const res = await axiosInstance.get('/api/admin/categories');
+
+      setCategories(res.data);
+      console.log(res.data);
+      
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
+
+  fetchCategories();
+}, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,26 +48,25 @@ const AddProductForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value || '');
+    });
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
+
     try {
-      const form = new FormData();
-      Object.entries({ ...formData, description }).forEach(([key, value]) => {
-        form.append(key, value);
-      });
-      if (imageFile) {
-        form.append("image", imageFile);
-      }
+      await axiosInstance.post('/api/admin/addProduct', data, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
 
-      await axiosInstance.post("/api/admin/products", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      alert("Product added successfully!");
-      router.push("/admin/dashboard");
-    } catch (err) {
-      console.error("Error adding product:", err);
-      alert("Failed to add product. Check console for details.");
+      alert('Product added successfully!');
+    } catch (error) {
+      console.error('Error adding product:', error);
+      alert('Failed to add product.');
     }
   };
 
@@ -73,28 +88,14 @@ const AddProductForm = () => {
             </td>
           </tr>
           <tr>
-            <td className="py-2 font-medium">Slug:</td>
-            <td className="py-2">
-              <input
-                type="text"
-                name="slug"
-                value={formData.slug}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-                required
-              />
-            </td>
-          </tr>
-          <tr>
-            <td className="py-2 font-medium align-top">Description:</td>
+            <td className="py-2 font-medium">Description:</td>
             <td className="py-2">
               <textarea
                 name="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleChange}
                 rows={5}
                 className="w-full border p-2 rounded"
-                placeholder="Enter product description"
                 required
               />
             </td>
@@ -109,18 +110,6 @@ const AddProductForm = () => {
                 onChange={handleChange}
                 className="w-full border p-2 rounded"
                 step="0.01"
-                required
-              />
-            </td>
-          </tr>
-          <tr>
-            <td className="py-2 font-medium">Image:</td>
-            <td className="py-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full border p-2 rounded"
                 required
               />
             </td>
@@ -141,11 +130,55 @@ const AddProductForm = () => {
           <tr>
             <td className="py-2 font-medium">Category:</td>
             <td className="py-2">
+              <select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+          </tr>
+          {/* <tr>
+            <td className="py-2 font-medium">Subcategory ID:</td>
+            <td className="py-2">
+              <input
+                type="text"
+                name="subcategory_id"
+                value={formData.subcategory_id}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr> */}
+          {/* <tr>
+            <td className="py-2 font-medium">Category (Slug):</td>
+            <td className="py-2">
               <input
                 type="text"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
+                className="w-full border p-2 rounded"
+                required
+              />
+            </td>
+          </tr> */}
+          <tr>
+            <td className="py-2 font-medium">Image:</td>
+            <td className="py-2">
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleFileChange}
                 className="w-full border p-2 rounded"
                 required
               />

@@ -30,8 +30,8 @@ const AdminLoginForm = () => {
     try {
       const response = await axiosInstance.post("/api/admin/login", formData);
       const { token, admin } = response.data;
+      dispatch(adminLoginSuccess({ admin, token }));
 
-      dispatch(adminLoginSuccess({ user: admin, token }));
       router.push("/admin/dashboard"); // Redirect after login
     } catch (err) {
       console.error("Login Error:", err);

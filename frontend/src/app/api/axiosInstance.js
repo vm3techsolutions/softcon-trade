@@ -7,19 +7,25 @@ const axiosInstance = axios.create({
   },
 });
 
-// Automatically attach JWT token from localStorage
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      console.log('JWT Token:', token);
+      const adminToken = localStorage.getItem("adminToken");
+      const userToken = localStorage.getItem("token");
+
+      const token = adminToken || userToken;
+
       if (token) {
         config.headers = {
           ...config.headers,
           Authorization: `Bearer ${token}`,
         };
+        console.log("JWT Token attached:", token);
+        console.log("Request headers:", config.headers);
+
       }
     }
+
     return config;
   },
   (error) => {
@@ -27,15 +33,29 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Handle responses
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Optional: remove token or redirect
-      localStorage.removeItem("token");
-      // Optional: redirect to login
-      window.location.href = "/login";
+    if (
+      error.response &&
+      (error.response.status === 401 || error.response.status === 403)
+    ) {
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+
+        // Clear both tokens
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("admin");
+
+        // Redirect based on path
+        if (currentPath.startsWith("/admin")) {
+          window.location.href = "/admin/login";
+        } else {
+          window.location.href = "/login";
+        }
+      }
     }
     return Promise.reject(error);
   }

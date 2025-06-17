@@ -10,7 +10,8 @@ const app = express();
 app.use(cors({
   origin: process.env.FRONT_END_URL || "http://localhost:3000",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json()); // To parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // For form data
