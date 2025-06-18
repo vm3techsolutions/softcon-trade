@@ -22,7 +22,7 @@ router.post('/admin/login', adminRegister.adminLogin);
 router.get('/admin/getData/:id', verifyToken, adminRegister.getAdminData);
 
 // add products
-router.post("/admin/addProduct", verifyToken ,upload.single("image"), addProduct);
+router.post("/admin/addProduct", verifyToken ,upload.array("image", 10), addProduct);
 
 // Get categories
 router.get('/admin/categories', verifyToken, getCategories);

@@ -17,14 +17,13 @@ const uploadToS3 = async (file, categorySlug) => {
 };
 
 const addProduct = (req, res) => {
-  let { name, description, price, stock, category_id, subcategory_id, category } = req.body;
-  
-  const file = req.file;
+  let { name, description, price, stock, category_id, subcategory_id } = req.body;
+  const files = req.files || [];
+  const file = files.length > 0 ? files[0] : null;
 
   subcategory_id = !subcategory_id || subcategory_id === "NULL" ? null : subcategory_id;
 
-  // Get category slug first
-  db.query("SELECT slug FROM categories WHERE id = ?", [category_id], async (err, categoryData) => {
+  db.query("SELECT name FROM categories WHERE id = ?", [category_id], async (err, categoryData) => {
     if (err) {
       console.error("DB Error:", err);
       return res.status(500).json({ error: "Database error" });
@@ -34,7 +33,12 @@ const addProduct = (req, res) => {
       return res.status(400).json({ error: "Invalid category ID" });
     }
 
-    const categorySlug = categoryData[0].slug;
+    const category = categoryData[0].name;
+    const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
+
+    if (!file) {
+      return res.status(400).json({ error: "Main image is required" });
+    }
 
     try {
       const image_url = await uploadToS3(file, categorySlug);
@@ -74,20 +78,46 @@ const addProduct = (req, res) => {
                       console.error("Insert Subcategory Error:", err);
                       return res.status(500).json({ error: "Failed to insert subcategory" });
                     }
-
-                    return res.json({ success: true, message: "Product added!" });
                   }
                 );
-              } else {
-                return res.json({ success: true, message: "Product added!" });
               }
             }
           );
+
+          // Upload additional images (skip first file)
+          const additionalImages = files.slice(1);
+          if (additionalImages.length > 0) {
+            let completed = 0;
+
+            additionalImages.forEach(async (img) => {
+              try {
+                const imageUrl = await uploadToS3(img, categorySlug);
+                db.query(
+                  "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+                  [productId, imageUrl],
+                  (err) => {
+                    if (err) {
+                      console.error("Insert product image error:", err);
+                    }
+
+                    completed++;
+                    if (completed === additionalImages.length) {
+                      return res.json({ success: true, message: "Product with images added!" });
+                    }
+                  }
+                );
+              } catch (imgErr) {
+                console.error("Extra image upload failed:", imgErr);
+              }
+            });
+          } else {
+            return res.json({ success: true, message: "Product added!" });
+          }
         }
       );
-    } catch (uploadErr) {
-      console.error("S3 Upload Error:", uploadErr);
-      return res.status(500).json({ error: "Image upload failed" });
+    } catch (mainErr) {
+      console.error("Main Image Upload Failed:", mainErr);
+      return res.status(500).json({ error: "Main image upload failed" });
     }
   });
 };
