@@ -16,8 +16,8 @@ const AddProductForm = () => {
     subcategory_id: '',
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [galleryFiles, setGalleryFiles] = useState([]); // for multiple gallery images
+  const [mainImage, setMainImage] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]); // for multiple gallery images
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -61,13 +61,11 @@ const AddProductForm = () => {
       data.append(key, value || '');
     });
 
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
+    // Append main image first
+    if (mainImage) data.append('image', mainImage);
 
-    galleryFiles.forEach((file) => {
-      data.append('images', file); // multiple files
-    });
+    // Append gallery images (if any)
+    galleryImages.forEach((img) => data.append('image', img));
 
     try {
       await axiosInstance.post('/api/admin/addProduct', data, {
@@ -190,7 +188,7 @@ const AddProductForm = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setImageFile(e.target.files[0])}
+                onChange={(e) => setMainImage(e.target.files[0])}
                 className="w-full border p-2 rounded"
                 required
               />
@@ -204,7 +202,7 @@ const AddProductForm = () => {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => setGalleryFiles(Array.from(e.target.files))}
+                onChange={(e) => setGalleryImages(Array.from(e.target.files))}
                 className="w-full border p-2 rounded"
               />
             </td>
