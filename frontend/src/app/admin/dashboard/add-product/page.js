@@ -5,6 +5,8 @@ import axiosInstance from '@/app/api/axiosInstance';
 
 const AddProductForm = () => {
   const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -12,37 +14,43 @@ const AddProductForm = () => {
     stock: '',
     category_id: '',
     subcategory_id: '',
-    category: '',
   });
+
   const [imageFile, setImageFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]); // for multiple gallery images
 
   useEffect(() => {
-  const fetchCategories = async () => {
-    try {
-      const res = await axiosInstance.get('/api/admin/categories');
+    const fetchCategories = async () => {
+      try {
+        const res = await axiosInstance.get('/api/admin/categories');
+        setCategories(res.data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-      setCategories(res.data);
-      console.log(res.data);
-      
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
-  };
-
-  fetchCategories();
-}, []);
-
+  const parentCategories = categories.filter(cat => cat.parent_id === null);
+  const allSubcategories = categories.filter(cat => cat.parent_id !== null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
-  const handleFileChange = (e) => {
-    setImageFile(e.target.files[0]);
+    if (name === 'category_id') {
+      setFormData(prev => ({
+        ...prev,
+        category_id: value,
+        subcategory_id: '', // reset on new parent
+      }));
+      const filteredSub = allSubcategories.filter(sub => sub.parent_id == value);
+      setSubcategories(filteredSub);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -52,16 +60,21 @@ const AddProductForm = () => {
     Object.entries(formData).forEach(([key, value]) => {
       data.append(key, value || '');
     });
+
     if (imageFile) {
       data.append('image', imageFile);
     }
 
+    galleryFiles.forEach((file) => {
+      data.append('images', file); // multiple files
+    });
+
     try {
       await axiosInstance.post('/api/admin/addProduct', data, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-});
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       alert('Product added successfully!');
     } catch (error) {
@@ -127,6 +140,8 @@ const AddProductForm = () => {
               />
             </td>
           </tr>
+
+          {/* Parent Category Dropdown */}
           <tr>
             <td className="py-2 font-medium">Category:</td>
             <td className="py-2">
@@ -138,7 +153,7 @@ const AddProductForm = () => {
                 required
               >
                 <option value="">Select Category</option>
-                {categories.map((cat) => (
+                {parentCategories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
@@ -146,44 +161,55 @@ const AddProductForm = () => {
               </select>
             </td>
           </tr>
-          {/* <tr>
-            <td className="py-2 font-medium">Subcategory ID:</td>
-            <td className="py-2">
-              <input
-                type="text"
-                name="subcategory_id"
-                value={formData.subcategory_id}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-              />
-            </td>
-          </tr> */}
-          {/* <tr>
-            <td className="py-2 font-medium">Category (Slug):</td>
-            <td className="py-2">
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full border p-2 rounded"
-                required
-              />
-            </td>
-          </tr> */}
+
+          {/* Subcategory Dropdown */}
+          {subcategories.length > 0 && (
+            <tr>
+              <td className="py-2 font-medium">Subcategory:</td>
+              <td className="py-2">
+                <select
+                  name="subcategory_id"
+                  value={formData.subcategory_id}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded"
+                >
+                  <option value="">Select Subcategory</option>
+                  {subcategories.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name}
+                    </option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+          )}
+
           <tr>
-            <td className="py-2 font-medium">Image:</td>
+            <td className="py-2 font-medium">Product Image:</td>
             <td className="py-2">
               <input
                 type="file"
-                name="image"
                 accept="image/*"
-                onChange={handleFileChange}
+                onChange={(e) => setImageFile(e.target.files[0])}
                 className="w-full border p-2 rounded"
                 required
               />
             </td>
           </tr>
+
+          <tr>
+            <td className="py-2 font-medium">Product Gallery:</td>
+            <td className="py-2">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setGalleryFiles(Array.from(e.target.files))}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr>
+
           <tr>
             <td></td>
             <td className="pt-4">
