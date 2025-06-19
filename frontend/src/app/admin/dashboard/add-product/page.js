@@ -22,7 +22,7 @@ const AddProductForm = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axiosInstance.get('/api/admin/categories');
+        const res = await axiosInstance.get('/api/categories');
         setCategories(res.data);
       } catch (err) {
         console.error('Error fetching categories:', err);
