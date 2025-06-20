@@ -9,6 +9,8 @@ const { addProduct } = require('../controller/addProducts/addProducts');
 const upload = require('../middleware/upload');
 const { getCategories } = require('../controller/Categories/getCategories');
 const { getAllProducts } = require('../controller/getProduct/getAllProduct');
+const { getProductByCategory } = require('../controller/getProduct/getProductByCategory');
+const { getProductById } = require('../controller/getProduct/getProductById');
 
 
 // Define routes for user registration and login
@@ -26,6 +28,10 @@ router.get('/admin/getData/:id', verifyToken, adminRegister.getAdminData);
 router.post("/admin/addProduct", verifyToken ,upload.array("image", 10), addProduct);
 // Get all products
 router.get('/getAllProducts', getAllProducts);
+// Get product by category
+router.get('/products/category/:category_id', getProductByCategory);
+// Get product by ID
+router.get('/products/:id', getProductById);
 
 // Get categories
 router.get('/categories', getCategories);

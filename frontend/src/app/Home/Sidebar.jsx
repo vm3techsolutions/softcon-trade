@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-
 import { fetchCategories } from "../store/categorySlice";
 import { fetchProductsByCategory } from "../store/productByCatSlice";
 
@@ -24,23 +23,29 @@ export default function Sidebar() {
     error: prodError,
   } = useSelector((state) => state.products || {});
 
+  // Fetch categories on mount
   useEffect(() => {
     console.log("Dispatching fetchCategories...");
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  // Load all products initially
   useEffect(() => {
     if (categories.length > 0 && activeCategoryId === null) {
-      const firstCategoryId = categories[0]._id;
-      setActiveCategoryId(firstCategoryId);
-      dispatch(fetchProductsByCategory(firstCategoryId));
+      setActiveCategoryId("all");
+      dispatch(fetchProductsByCategory("all"));
     }
   }, [categories, activeCategoryId, dispatch]);
 
+  // Handle category click
   const handleCategoryClick = (id) => {
     setActiveCategoryId(id);
     dispatch(fetchProductsByCategory(id));
   };
+
+  // console.log("all categories:", categories);
+  // console.log("activeCategoryId:", activeCategoryId);
+  // console.log("products for active category:", products);
 
   return (
     <section>
@@ -53,12 +58,27 @@ export default function Sidebar() {
             <p className="text-red-500">Error loading categories</p>
           ) : (
             <ul className="space-y-3">
+              {/* All Button */}
+              <li key="all" className="border-b border-gray-300">
+                <button
+                  onClick={() => handleCategoryClick("all")}
+                  className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
+                    activeCategoryId === "all"
+                      ? "text-yellow-400"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  All
+                </button>
+              </li>
+
+              {/* Dynamic Category List */}
               {categories.map((category) => (
-                <li key={category._id} className="border-b border-gray-300">
+                <li key={category.id} className="border-b border-gray-300">
                   <button
-                    onClick={() => handleCategoryClick(category._id)}
+                    onClick={() => handleCategoryClick(category.id)}
                     className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
-                      activeCategoryId === category._id
+                      activeCategoryId === category.id
                         ? "text-yellow-400"
                         : "bg-white hover:bg-gray-100"
                     }`}
@@ -81,7 +101,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Product Section */}
+      {/* Product Display */}
       <div className="w-full md:w-4/5">
         <div className="p-4 bg-white shadow-md rounded-lg min-h-[200px]">
           {prodLoading ? (
@@ -96,13 +116,45 @@ export default function Sidebar() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {products.map((product) => (
                 <div
-                  key={product._id}
+                  key={product.id}
                   className="border p-4 rounded-md shadow hover:shadow-md transition"
                 >
+                  {/* Main Image */}
+                  {product.image_url && (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-40 object-contain mb-2 rounded"
+                    />
+                  )}
                   <h3 className="text-lg font-semibold text-[#044E78]">
                     {product.name}
                   </h3>
-                  <p className="text-sm text-gray-600">{product.description}</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {product.description}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    <span className="font-semibold">Category:</span> {product.category}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-1">
+                    <span className="font-semibold">Price:</span> ₹{product.price}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    <span className="font-semibold">Stock:</span> {product.stock}
+                  </p>
+                  {/* Gallery Images */}
+                  {product.gallery_images && product.gallery_images.length > 0 && (
+                    <div className="flex gap-2 mt-2">
+                      {product.gallery_images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Gallery ${idx + 1}`}
+                          className="w-10 h-10 object-cover rounded border"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

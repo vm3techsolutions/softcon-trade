@@ -15,11 +15,13 @@ import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logout } from "@/app/store/authSlice"; // adjust import based on your project structure
+import { searchProducts } from "@/app/store/productByCatSlice";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = useSelector((state) => state.auth.user);
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
 
   const router = useRouter();
@@ -27,6 +29,12 @@ export default function Header() {
     dispatch(logout());
     setDropdownOpen(false);
     router.push("/Login");
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    dispatch(searchProducts(value));
   };
 
   return (
@@ -78,13 +86,15 @@ export default function Header() {
             type="text"
             placeholder="Type here to search..."
             className="pl-12 pr-4 py-2 rounded-full border border-black w-full focus:outline-none"
+            value={searchTerm}
+            onChange={handleSearch}
           />
+
         </div>
 
         <nav
-          className={`${
-            menuOpen ? "flex" : "hidden"
-          } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
+          className={`${menuOpen ? "flex" : "hidden"
+            } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
         >
           <Link href="#">Technical Support</Link>
           <Link href="#">How to Buy</Link>
