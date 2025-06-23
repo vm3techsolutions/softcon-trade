@@ -12,7 +12,7 @@ const { getAllProducts } = require('../controller/getProduct/getAllProduct');
 const { getProductByCategory } = require('../controller/getProduct/getProductByCategory');
 const { getProductById } = require('../controller/getProduct/getProductById');
 const wiishListController = require('../controller/wishList/wishlistController');
-
+const cartController = require('../controller/cart/cartController');
 
 // Define routes for user registration and login
 router.post('/user/signup', userRegister.userSignUp);
@@ -42,8 +42,11 @@ router.get('/wishlist/:userId', verifyToken, wiishListController.getWishlistByUs
 router.post('/wishlist/add', verifyToken, wiishListController.addToWishlist);
 router.delete('/wishlist/remove', verifyToken, wiishListController.removeFromWishlist);
 
-
-
-
+// Cart routes
+router.get("/cart/:userId", verifyToken, cartController.getCart);
+router.post("/cart/add", verifyToken, cartController.addToCart);
+router.put("/cart/update", verifyToken, cartController.updateCartItem);
+router.delete("/cart/remove", verifyToken, cartController.removeFromCart);
+router.post("/cart/clear", verifyToken, cartController.clearCart);
 
 module.exports = router;
