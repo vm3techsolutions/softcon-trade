@@ -54,7 +54,10 @@ export default function Header() {
         <div className="hidden md:flex flex-col items-start text-gray-700">
           <div className="flex items-center space-x-2">
             <Mail className="w-4 h-4 text-[#FFB703]" />
-            <a href="mailto:sales@softcon.net.in" className="hover:text-[#044E78]">
+            <a
+              href="mailto:sales@softcon.net.in"
+              className="hover:text-[#044E78]"
+            >
               sales@softcon.net.in
             </a>
           </div>
@@ -89,12 +92,12 @@ export default function Header() {
             value={searchTerm}
             onChange={handleSearch}
           />
-
         </div>
 
         <nav
-          className={`${menuOpen ? "flex" : "hidden"
-            } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
+          className={`${
+            menuOpen ? "flex" : "hidden"
+          } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
         >
           <Link href="#">Technical Support</Link>
           <Link href="#">How to Buy</Link>
@@ -143,6 +146,9 @@ export default function Header() {
           </Link>
           <Link href="/cart">
             <ShoppingCart className="w-5 h-5 cursor-pointer" />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+              {/* {cartItems.length} */}
+            </span>
           </Link>
         </div>
       </div>
