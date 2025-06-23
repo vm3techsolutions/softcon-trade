@@ -133,7 +133,6 @@ export default function ProductGrid({ activeCategoryId }) {
           </div>
         )}
       </div>
-    </div>
   );
 }
 // This component displays a grid of products based on the selected category.

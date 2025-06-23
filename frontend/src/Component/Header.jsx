@@ -44,9 +44,6 @@ export default function Header() {
     setSearchTerm(value);
     dispatch(searchProducts(value));
   };
-
-    const cartItems = useSelector((state) => state.cart.items); //  'cart' is the key in your store
-
   return (
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
       {/* Top Header */}
@@ -169,7 +166,7 @@ export default function Header() {
           <Link href="/cart">
             <ShoppingCart className="w-5 h-5 cursor-pointer" />
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-              {cartItems.length}
+              {/* {cartItems.length} */}
             </span>
           </Link>
         </div>
