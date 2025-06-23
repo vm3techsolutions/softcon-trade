@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Phone,
@@ -14,17 +14,25 @@ import {
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { logout } from "@/app/store/authSlice"; // adjust import based on your project structure
+import { logout } from "@/app/store/authSlice";
 import { searchProducts } from "@/app/store/productByCatSlice";
+import { fetchWishlist } from "@/app/store/wishlistSlice";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const user = useSelector((state) => state.auth.user);
   const [searchTerm, setSearchTerm] = useState("");
+  const user = useSelector((state) => state.auth.user);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
   const dispatch = useDispatch();
-
   const router = useRouter();
+
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchWishlist(user.id));
+    }
+  }, [dispatch, user]);
+
   const handleLogout = () => {
     dispatch(logout());
     setDropdownOpen(false);
@@ -42,13 +50,15 @@ export default function Header() {
       {/* Top Header */}
       <div className="flex items-center justify-between px-10 py-2 text-sm">
         <div className="flex items-center space-x-2">
-          <Image
-            src="/assets/Softcon-Logo.png"
-            alt="Softcon Logo"
-            width={40}
-            height={40}
-            className="w-32 object-contain"
-          />
+          <Link href="/">
+            <Image
+              src="/assets/Softcon-Logo.png"
+              alt="Softcon Logo"
+              width={40}
+              height={40}
+              className="w-32 object-contain cursor-pointer"
+            />
+          </Link>
         </div>
 
         <div className="hidden md:flex flex-col items-start text-gray-700">
@@ -78,6 +88,7 @@ export default function Header() {
 
       {/* Bottom Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-3 gap-4">
+        {/* Search */}
         <div className="relative w-full md:max-w-sm">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pr-3 border-r border-black">
             <Search className="text-[#FFB703] w-5 h-5" />
@@ -89,9 +100,9 @@ export default function Header() {
             value={searchTerm}
             onChange={handleSearch}
           />
-
         </div>
 
+        {/* Navigation Links */}
         <nav
           className={`${menuOpen ? "flex" : "hidden"
             } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
@@ -104,7 +115,7 @@ export default function Header() {
         </nav>
 
         {/* Icons */}
-        <div className="flex space-x-4 text-[#FFB703] relative justify-end">
+        <div className="flex space-x-4 text-[#FFB703] relative justify-end items-center">
           {user ? (
             <div
               className="relative"
@@ -138,9 +149,17 @@ export default function Header() {
             </Link>
           )}
 
-          <Link href="/wishlist">
+          {/* Wishlist with badge */}
+          <Link href="/wishlist" className="relative">
             <Heart className="w-5 h-5 cursor-pointer" />
+            {wishlistItems?.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                {wishlistItems.length}
+              </span>
+            )}
           </Link>
+
+          {/* Cart icon */}
           <Link href="/cart">
             <ShoppingCart className="w-5 h-5 cursor-pointer" />
           </Link>

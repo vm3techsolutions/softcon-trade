@@ -3,7 +3,12 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByCategory } from "@/app/store/productByCatSlice";
-import { FaShoppingCart, FaHeart } from "react-icons/fa";
+import {
+  fetchWishlist,
+  addToWishlist,
+  removeFromWishlist,
+} from "@/app/store/wishlistSlice";
+import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { HiOutlineChevronDoubleRight } from "react-icons/hi";
 
 function truncateDescription(description, wordLimit = 12) {
@@ -16,21 +21,51 @@ function truncateDescription(description, wordLimit = 12) {
 export default function ProductGrid({ activeCategoryId }) {
   const dispatch = useDispatch();
 
+  const user = useSelector((state) => state.auth.user);
+  const userId = user?.id;
+
+  const wishlistItems = useSelector((state) => state.wishlist.items || []);
+  const wishlistLoading = useSelector((state) => state.wishlist.loading);
+
+  console.log("Wishlist Items:", wishlistItems);
+  
+
   const {
     data: products = [],
     loading: prodLoading,
     error: prodError,
   } = useSelector((state) => state.products || {});
 
+  // Fetch products on category change
   useEffect(() => {
     if (activeCategoryId) {
       dispatch(fetchProductsByCategory(activeCategoryId));
     }
   }, [activeCategoryId, dispatch]);
 
+  // Fetch wishlist when user ID is ready
+  useEffect(() => {
+    if (userId) {
+      dispatch(fetchWishlist(userId));
+    }
+  }, [userId, dispatch]);
+
+  const handleWishlistClick = (productId) => {
+    if (!userId) return;
+    if (wishlistItems.includes(productId)) {
+      dispatch(removeFromWishlist({ userId, productId }));
+    } else {
+      dispatch(addToWishlist({ userId, productId }));
+    }
+  };
+
+  if (!userId) {
+    return <p className="text-gray-500">Please login to view wishlist.</p>;
+  }
+
   return (
-    <div className=" p-4 bg-white shadow-md rounded-lg ">
-      {prodLoading ? (
+    <div className="p-4 bg-white shadow-md rounded-lg">
+      {prodLoading || wishlistLoading ? (
         <p className="text-gray-500">Loading products...</p>
       ) : prodError ? (
         <p className="text-red-500">Error loading products</p>
@@ -44,7 +79,19 @@ export default function ProductGrid({ activeCategoryId }) {
               className="relative border p-6 rounded-xl shadow hover:shadow-md transition flex flex-col justify-between"
             >
               {/* Wishlist Icon */}
-              <button className="absolute top-4 right-4 p-2 rounded-full bg-[#FFB703] text-white hover:text-red-500 transition">
+              <button
+                onClick={() => handleWishlistClick(product.id)}
+                className={`absolute top-4 right-4 p-2 rounded-full bg-[#FFB703] transition ${
+                  wishlistItems.includes(product.id)
+                    ? "text-red-500"
+                    : "text-white"
+                }`}
+                title={
+                  wishlistItems.includes(product.id)
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
+              >
                 <FaHeart size={18} />
               </button>
 
@@ -55,11 +102,11 @@ export default function ProductGrid({ activeCategoryId }) {
                   className="w-full h-40 object-contain mb-2 rounded"
                 />
               )}
+
               <h3 className="text-md font-extrabold text-[#044E78]">
                 {product.name}
               </h3>
 
-              {/* Static 5-star rating */}
               <div className="text-yellow-500 text-xl mb-2">★★★★★</div>
 
               <p className="text-sm text-gray-600 mb-1">
@@ -85,3 +132,4 @@ export default function ProductGrid({ activeCategoryId }) {
     </div>
   );
 }
+// This component displays a grid of products based on the selected category.

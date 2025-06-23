@@ -11,6 +11,7 @@ const { getCategories } = require('../controller/Categories/getCategories');
 const { getAllProducts } = require('../controller/getProduct/getAllProduct');
 const { getProductByCategory } = require('../controller/getProduct/getProductByCategory');
 const { getProductById } = require('../controller/getProduct/getProductById');
+const wiishListController = require('../controller/wishList/wishlistController');
 
 
 // Define routes for user registration and login
@@ -35,6 +36,12 @@ router.get('/products/:id', getProductById);
 
 // Get categories
 router.get('/categories', getCategories);
+
+// Wishlist routes
+router.get('/wishlist/:userId', verifyToken, wiishListController.getWishlistByUser);
+router.post('/wishlist/add', verifyToken, wiishListController.addToWishlist);
+router.delete('/wishlist/remove', verifyToken, wiishListController.removeFromWishlist);
+
 
 
 
