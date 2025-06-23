@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByCategory } from "@/app/store/productByCatSlice";
 import {
@@ -109,26 +109,30 @@ export default function ProductGrid({ activeCategoryId }) {
 
               <div className="text-yellow-500 text-xl mb-2">★★★★★</div>
 
-              <p className="text-sm text-gray-600 mb-1">
-                {truncateDescription(product.description)}
-              </p>
+                <p className="text-sm text-gray-600 mb-1">
+                  {truncateDescription(product.description)}
+                </p>
 
-              <p className="text-sm font-semibold text-gray-800 mb-2">
-                Price: ₹ {product.price} / Piece
-              </p>
+                <p className="text-sm font-semibold text-gray-800 mb-2">
+                  Price: ₹ {product.price} / Piece
+                </p>
 
-              <div className="flex w-full gap-2 mt-auto">
-                <button className="flex items-center justify-center gap-1 w-1/2 text-md bg-[#FFB703] hover:bg-blue-600 text-white px-3 py-1 font-bold rounded-2xl">
-                  Know More <HiOutlineChevronDoubleRight size={14} />
-                </button>
-                <button className="flex items-center justify-center gap-1 w-1/2 text-md bg-[#FFB703] hover:bg-green-600 text-white px-3 py-1 font-bold rounded-2xl">
-                  Add to Cart <FaShoppingCart size={14} />
-                </button>
+                <div className="flex w-full gap-2 mt-auto">
+                  <button className="flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-blue-600 text-white px-1 py-1 font-bold rounded-2xl">
+                    Know More <HiOutlineChevronDoubleRight size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-green-600 text-white px-1 py-1 font-bold rounded-2xl"
+                  >
+                    Add to Cart <FaShoppingCart size={14} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

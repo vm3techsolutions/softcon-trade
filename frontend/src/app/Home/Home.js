@@ -26,7 +26,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="w-full md:w-4/5">
+      <div className="w-full md:w-full">
         <ProductGrid activeCategoryId={activeCategoryId} />
       </div>
     </section>
