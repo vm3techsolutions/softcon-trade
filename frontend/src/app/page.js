@@ -1,10 +1,10 @@
 import React from 'react'
-import Sidebar from './Home/Sidebar'
+import Home from './Home/Home'
 
 export default function page() {
   return (
     <div>
-      <Sidebar/>
+      <Home/>
     </div>
   )
 }
