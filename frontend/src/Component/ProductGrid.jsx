@@ -3,6 +3,15 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByCategory } from "@/app/store/productByCatSlice";
+import { FaShoppingCart, FaHeart } from "react-icons/fa";
+import { HiOutlineChevronDoubleRight } from "react-icons/hi";
+
+function truncateDescription(description, wordLimit = 12) {
+  const words = description?.split(" ");
+  return words?.length > wordLimit
+    ? words.slice(0, wordLimit).join(" ") + "..."
+    : description;
+}
 
 export default function ProductGrid({ activeCategoryId }) {
   const dispatch = useDispatch();
@@ -20,7 +29,7 @@ export default function ProductGrid({ activeCategoryId }) {
   }, [activeCategoryId, dispatch]);
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg min-h-[200px]">
+    <div className=" p-4 bg-white shadow-md rounded-lg ">
       {prodLoading ? (
         <p className="text-gray-500">Loading products...</p>
       ) : prodError ? (
@@ -32,8 +41,13 @@ export default function ProductGrid({ activeCategoryId }) {
           {products.map((product) => (
             <div
               key={product.id}
-              className="border p-4 rounded-md shadow hover:shadow-md transition"
+              className="relative border p-6 rounded-xl shadow hover:shadow-md transition flex flex-col justify-between"
             >
+              {/* Wishlist Icon */}
+              <button className="absolute top-4 right-4 p-2 rounded-full bg-[#FFB703] text-white hover:text-red-500 transition">
+                <FaHeart size={18} />
+              </button>
+
               {product.image_url && (
                 <img
                   src={product.image_url}
@@ -44,30 +58,26 @@ export default function ProductGrid({ activeCategoryId }) {
               <h3 className="text-md font-extrabold text-[#044E78]">
                 {product.name}
               </h3>
-              <p className="text-sm text-gray-600 mb-1">{product.description}</p>
-              <p className="text-xs text-gray-500 mb-1">
-                <span className="font-semibold">Category:</span>{" "}
-                {product.category}
+
+              {/* Static 5-star rating */}
+              <div className="text-yellow-500 text-xl mb-2">★★★★★</div>
+
+              <p className="text-sm text-gray-600 mb-1">
+                {truncateDescription(product.description)}
               </p>
-              <p className="text-xs text-gray-500 mb-1">
-                <span className="font-semibold">Price:</span> ₹
-                {product.price} / Piece
+
+              <p className="text-sm font-semibold text-gray-800 mb-2">
+                Price: ₹ {product.price} / Piece
               </p>
-              <p className="text-xs text-gray-500 mb-2">
-                <span className="font-semibold">Stock:</span> {product.stock}
-              </p>
-              {product.gallery_images?.length > 0 && (
-                <div className="flex gap-2 mt-2">
-                  {product.gallery_images.map((img, idx) => (
-                    <img
-                      key={idx}
-                      src={img}
-                      alt={`Gallery ${idx + 1}`}
-                      className="w-10 h-10 object-cover rounded border"
-                    />
-                  ))}
-                </div>
-              )}
+
+              <div className="flex w-full gap-2 mt-auto">
+                <button className="flex items-center justify-center gap-1 w-1/2 text-md bg-[#FFB703] hover:bg-blue-600 text-white px-3 py-1 font-bold rounded-2xl">
+                  Know More <HiOutlineChevronDoubleRight size={14} />
+                </button>
+                <button className="flex items-center justify-center gap-1 w-1/2 text-md bg-[#FFB703] hover:bg-green-600 text-white px-3 py-1 font-bold rounded-2xl">
+                  Add to Cart <FaShoppingCart size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
