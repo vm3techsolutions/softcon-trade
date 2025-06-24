@@ -59,9 +59,7 @@ export default function ProductGrid({ activeCategoryId }) {
     }
   };
 
-  if (!userId) {
-    return <p className="text-gray-500">Please login to view wishlist.</p>;
-  }
+ 
 
   return (
     <div className="p-4 bg-white shadow-md rounded-lg">
