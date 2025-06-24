@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/app/store/authSlice";
+import { fetchCart } from "@/app/store/cartSlice";
 import axiosInstance from "@/app/api/axiosInstance";
 
 const LoginForm = () => {
@@ -41,13 +42,18 @@ const LoginForm = () => {
 
     try {
       const res = await axiosInstance.post("/api/user/login", {
-  email: loginData.email,
-  password: loginData.password,
-});
+        email: loginData.email,
+        password: loginData.password,
+      });
 
       const { token, user } = res.data;
       localStorage.setItem("token", token);
+
       dispatch(loginSuccess({ user, token }));
+
+      // Fetch the user's cart after successful login
+      dispatch(fetchCart(user.id));
+
       router.push("/dashboard");
     } catch (error) {
       const message =
@@ -77,7 +83,9 @@ const LoginForm = () => {
           className="w-full p-2 border rounded"
           required
         />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email}</p>
+        )}
       </div>
 
       <div>

@@ -8,6 +8,10 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "@/app/store/wishlistSlice";
+import {
+  fetchCart,
+  addToCart,
+} from "@/app/store/cartSlice"; // ✅ Import addToCart
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { HiOutlineChevronDoubleRight } from "react-icons/hi";
 
@@ -30,6 +34,9 @@ export default function ProductGrid({ activeCategoryId }) {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
+  const cartItems = useSelector((state) => state.cart.items || []);
+
+
   console.log("Wishlist Items:", wishlistItems);
   
 
@@ -45,8 +52,43 @@ export default function ProductGrid({ activeCategoryId }) {
       dispatch(fetchProductsByCategory(activeCategoryId));
     }
   }, [activeCategoryId, dispatch]);
+  
 
-  // Add to Cart
+const handleAddToCart = (product) => {
+  const payload = {
+    userId,
+    product: {
+      product_id: product.id,
+      quantity: 1, // default to 1; can be made dynamic later
+    },
+  };
+
+  dispatch(addToCart(payload))
+    .unwrap()
+    .then(() => {
+      setPopupMessage(`✅ ${product.name} added to cart`);
+      setShowPopup(true);
+    })
+    .catch(() => {
+      setPopupMessage("❌ Failed to add item to cart");
+      setShowPopup(true);
+    });
+
+  setTimeout(() => {
+    setShowPopup(false);
+    setPopupMessage("");
+  }, 2000);
+};
+
+
+// ✅ Fetch cart items when user is logged in
+useEffect(() => {
+  if (userId) {
+    dispatch(fetchCart(userId));
+  }
+}, [userId, dispatch]);
+
+
 
   // Fetch wishlist when user ID is ready
   useEffect(() => {

@@ -17,12 +17,14 @@ import { useRouter } from "next/navigation";
 import { logout } from "@/app/store/authSlice";
 import { searchProducts } from "@/app/store/productByCatSlice";
 import { fetchWishlist } from "@/app/store/wishlistSlice";
+import { fetchCart } from "@/app/store/cartSlice";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const user = useSelector((state) => state.auth.user);
+  const cartItems = useSelector((state) => state.cart.items);
   const wishlistItems = useSelector((state) => state.wishlist.items);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -45,8 +47,6 @@ export default function Header() {
     dispatch(searchProducts(value));
   };
 
-  const cartItems = useSelector((state) => state.cart.items); //  'cart' is the key in your store
-  // const wishlistItems = useSelector((state) => state.wishlist.items);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">

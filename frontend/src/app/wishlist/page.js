@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeFromWishlist } from "@/app/store/wishlistSlice";
 import { addToCart } from "@/app/store/cartSlice";
 import { FaShoppingCart, FaTrash } from "react-icons/fa";
+import Image from "next/image";
 
 export default function WishlistPage() {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ export default function WishlistPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {wishlistItems.map((product) => (
             <div key={product.id} className="border p-4 rounded-lg shadow">
-              <img
+              <Image
                 src={product.image_url}
                 alt={product.name}
                 className="w-full h-40 object-contain mb-2"
