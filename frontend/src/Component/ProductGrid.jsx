@@ -43,6 +43,8 @@ export default function ProductGrid({ activeCategoryId }) {
     }
   }, [activeCategoryId, dispatch]);
 
+  // Add to Cart
+
   // Fetch wishlist when user ID is ready
   useEffect(() => {
     if (userId) {
