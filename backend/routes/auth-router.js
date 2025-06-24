@@ -48,5 +48,6 @@ router.post("/cart/add", verifyToken, cartController.addToCart);
 router.put("/cart/update", verifyToken, cartController.updateCartItem);
 router.delete("/cart/remove", verifyToken, cartController.removeFromCart);
 router.post("/cart/clear", verifyToken, cartController.clearCart);
+router.post("/cart/merge", cartController.mergeCart);
 
 module.exports = router;

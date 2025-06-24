@@ -114,10 +114,59 @@ const clearCart = (req, res) => {
   });
 };
 
+// Merge cart items
+const mergeCart = (req, res) => {
+  const { userId, items } = req.body;
+  if (!userId || !Array.isArray(items)) {
+    return res.status(400).json({ error: "userId and items are required" });
+  }
+
+  getOrCreateCart(userId, async (err, cart_id) => {
+    if (err) return res.status(500).json({ error: "DB error" });
+
+    // Use a promise chain to process items sequentially
+    for (const item of items) {
+      await new Promise((resolve, reject) => {
+        db.query(
+          "SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ?",
+          [cart_id, item.product_id],
+          (err, results) => {
+            if (err) return reject(err);
+            if (results.length > 0) {
+              // Update quantity
+              db.query(
+                "UPDATE cart_items SET quantity = quantity + ? WHERE id = ?",
+                [item.quantity, results[0].id],
+                (err) => {
+                  if (err) return reject(err);
+                  resolve();
+                }
+              );
+            } else {
+              // Insert new item
+              db.query(
+                "INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, ?)",
+                [cart_id, item.product_id, item.quantity],
+                (err) => {
+                  if (err) return reject(err);
+                  resolve();
+                }
+              );
+            }
+          }
+        );
+      });
+    }
+
+    res.json({ message: "Cart merged" });
+  });
+};
+
 module.exports = {
   getCart,
   addToCart,
   updateCartItem,
   removeFromCart,
   clearCart,
+  mergeCart,
 };
