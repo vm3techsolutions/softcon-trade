@@ -3,6 +3,7 @@ import authReducer from "./authSlice";
 import adminAuthReducer from "./adminAuthSlice";
 import categoryReducer from "./categorySlice";
 import productByCatReducer from "./productByCatSlice";
+import cartReducer from "./cartSlice";
 import wishlistReducer from "./wishlistSlice";
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     adminAuth: adminAuthReducer,
     categories: categoryReducer,
     products: productByCatReducer,
-    wishlist: wishlistReducer, // ✅ lowercase w
+    cart: cartReducer,
+    wishlist: wishlistReducer,
   },
 });

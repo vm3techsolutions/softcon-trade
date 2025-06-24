@@ -27,6 +27,9 @@ export default function ProductGrid({ activeCategoryId }) {
   const wishlistItems = useSelector((state) => state.wishlist.items || []);
   const wishlistLoading = useSelector((state) => state.wishlist.loading);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
   console.log("Wishlist Items:", wishlistItems);
   
 
@@ -53,18 +56,32 @@ export default function ProductGrid({ activeCategoryId }) {
   }, [userId, dispatch]);
 
   const handleWishlistClick = (productId) => {
-    if (!userId) return;
-    if (wishlistItems.includes(productId)) {
-      dispatch(removeFromWishlist({ userId, productId }));
+    const product = products.find((p) => p.id === productId);
+    if (!userId) {
+      setPopupMessage("⚠️ Please login first to manage wishlist");
+      setShowPopup(true);
     } else {
-      dispatch(addToWishlist({ userId, productId }));
+      if (wishlistItems.includes(productId)) {
+        dispatch(removeFromWishlist({ userId, productId }));
+        setPopupMessage(`❌ ${product?.name || "Item"} removed from wishlist`);
+      } else {
+        dispatch(addToWishlist({ userId, productId }));
+        setPopupMessage(`❤️ ${product?.name || "Item"} added to wishlist`);
+      }
+      setShowPopup(true);
     }
+
+    // Hide popup after 2 seconds
+    setTimeout(() => {
+      setShowPopup(false);
+      setPopupMessage("");
+    }, 2000);
   };
 
- 
+  
 
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
+    <div className="p-4">
       {prodLoading || wishlistLoading ? (
         <p className="text-gray-500">Loading products...</p>
       ) : prodError ? (
@@ -72,7 +89,7 @@ export default function ProductGrid({ activeCategoryId }) {
       ) : products.length === 0 ? (
         <p className="text-gray-400">No products found for this category.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
               key={product.id}
@@ -132,6 +149,13 @@ export default function ProductGrid({ activeCategoryId }) {
             ))}
           </div>
         )}
+
+        {/* Popup */}
+      {showPopup && popupMessage && (
+        <div className="fixed top-5 right-5 bg-white text-black shadow-lg border border-green-400 px-4 py-2 rounded-lg z-50 transition duration-300">
+          {popupMessage}
+        </div>
+      )}
       </div>
   );
 }

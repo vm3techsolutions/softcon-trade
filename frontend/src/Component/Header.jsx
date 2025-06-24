@@ -44,6 +44,10 @@ export default function Header() {
     setSearchTerm(value);
     dispatch(searchProducts(value));
   };
+
+  const cartItems = useSelector((state) => state.cart.items); //  'cart' is the key in your store
+  // const wishlistItems = useSelector((state) => state.wishlist.items);
+
   return (
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
       {/* Top Header */}
@@ -152,23 +156,28 @@ export default function Header() {
             </Link>
           )}
 
-          {/* Wishlist with badge */}
-          <Link href="/wishlist" className="relative">
-            <Heart className="w-5 h-5 cursor-pointer" />
-            {wishlistItems?.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
-                {wishlistItems.length}
-              </span>
-            )}
-          </Link>
-
-          {/* Cart icon */}
-          <Link href="/cart">
-            <ShoppingCart className="w-5 h-5 cursor-pointer" />
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-              {/* {cartItems.length} */}
-            </span>
-          </Link>
+          {/* Wishlist Icon */}
+          <div className="relative">
+            <Link href="/wishlist">
+              <Heart className="w-5 h-5 cursor-pointer" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
+          </div>
+          {/* Cart Icon */}
+          <div className="relative">
+            <Link href="/cart">
+              <ShoppingCart className="w-5 h-5 cursor-pointer" />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
       </div>
     </header>
