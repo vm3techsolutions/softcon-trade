@@ -42,8 +42,4 @@ router.get('/wishlist/:userId', verifyToken, wiishListController.getWishlistByUs
 router.post('/wishlist/add', verifyToken, wiishListController.addToWishlist);
 router.delete('/wishlist/remove', verifyToken, wiishListController.removeFromWishlist);
 
-
-
-
-
 module.exports = router;
