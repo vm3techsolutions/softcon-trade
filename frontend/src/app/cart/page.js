@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchCart,
@@ -8,14 +8,16 @@ import {
   removeFromCart,
   clearCart,
 } from "@/app/store/cartSlice";
+import { fetchProductById } from "@/app/store/productByIdSlice";
 import Image from "next/image";
 
 export default function CartPage() {
   const dispatch = useDispatch();
-
   const userId = useSelector((state) => state.auth.user?.id || null);
   const cartItems = useSelector((state) => state.cart.items);
   const loading = useSelector((state) => state.cart.loading);
+
+  const [productDetails, setProductDetails] = useState({});
 
   useEffect(() => {
     if (userId) {
@@ -23,10 +25,26 @@ export default function CartPage() {
     }
   }, [dispatch, userId]);
 
+  // Fetch product details for each cart item
   useEffect(() => {
-    console.log("User ID:", userId);
-    console.log("Cart items:", cartItems);
-  }, [userId, cartItems]);
+    const fetchDetails = async () => {
+      const details = {};
+      for (const item of cartItems) {
+        if (!productDetails[item.product_id]) {
+          const res = await dispatch(fetchProductById(item.product_id));
+          if (res.meta.requestStatus === "fulfilled") {
+            details[item.product_id] = res.payload;
+          }
+        }
+      }
+      setProductDetails((prev) => ({ ...prev, ...details }));
+    };
+
+    if (cartItems.length > 0) {
+      fetchDetails();
+    }
+    // eslint-disable-next-line
+  }, [cartItems, dispatch]);
 
   const handleQuantityChange = (productId, quantity) => {
     if (quantity < 1) return;
@@ -35,14 +53,24 @@ export default function CartPage() {
 
   const handleRemove = (productId) => {
     dispatch(removeFromCart({ userId, productId }));
+    setProductDetails((prev) => {
+      const updated = { ...prev };
+      delete updated[productId];
+      return updated;
+    });
   };
 
   const handleClearCart = () => {
     dispatch(clearCart(userId));
+    setProductDetails({});
   };
 
+  console.log("productDetails", productDetails);
+
+
   const total = cartItems.reduce((acc, item) => {
-    const price = item.product?.price || 0;
+    const product = productDetails[item.product_id];
+    const price = product?.price || 0;
     return acc + price * item.quantity;
   }, 0);
 
@@ -57,47 +85,51 @@ export default function CartPage() {
       ) : (
         <>
           <div className="space-y-4">
-            {cartItems.map((item) => (
-              <div
-                key={item.product_id}
-                className="flex items-center justify-between border p-4 rounded-md"
-              >
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={item.product?.image_url || "/placeholder.png"}
-                    alt={item.product?.name || "Product"}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 object-contain"
-                  />
-                  <div>
-                    <h2 className="font-semibold">
-                      {item.product?.name || "Product Name"}
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      ₹{item.product?.price || 0} × {item.quantity}
-                    </p>
+            {cartItems.map((item) => {
+              const product = productDetails[item.product_id];
+              return (
+                <div
+                  key={item.product_id}
+                  className="flex items-center justify-between border p-4 rounded-md"
+                >
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={product?.image_url || "/placeholder.png"}
+                      alt={product?.name || "Product"}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 object-contain"
+                    />
+
+                    <div>
+                      <h2 className="font-semibold">
+                        {product?.name || "Product Name"}
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        ₹{product?.price || 0} × {item.quantity}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(item.product_id, +e.target.value)
+                      }
+                      className="w-16 p-1 border rounded"
+                    />
+                    <button
+                      onClick={() => handleRemove(item.product_id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(item.product_id, +e.target.value)
-                    }
-                    className="w-16 p-1 border rounded"
-                  />
-                  <button
-                    onClick={() => handleRemove(item.product_id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-6 flex justify-between items-center">
