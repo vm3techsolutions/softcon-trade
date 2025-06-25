@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/app/store/authSlice";
-import { fetchCart } from "@/app/store/cartSlice";
+import { fetchCart, mergeGuestCart } from "@/app/store/cartSlice";
 import axiosInstance from "@/app/api/axiosInstance";
 
 const LoginForm = () => {
@@ -49,11 +49,16 @@ const LoginForm = () => {
       const { token, user } = res.data;
       localStorage.setItem("token", token);
 
+      // Step 1: Save login info in Redux
       dispatch(loginSuccess({ user, token }));
 
-      // Fetch the user's cart after successful login
+      // Step 2: Merge guest cart with user cart
+      await dispatch(mergeGuestCart(user.id));
+
+      // Step 3: Fetch updated cart from backend
       dispatch(fetchCart(user.id));
 
+      // Step 4: Redirect
       router.push("/dashboard");
     } catch (error) {
       const message =
