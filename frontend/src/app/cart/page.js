@@ -10,13 +10,14 @@ import {
 } from "@/app/store/cartSlice";
 import { fetchProductById } from "@/app/store/productByIdSlice";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.user?.id || null);
   const cartItems = useSelector((state) => state.cart.items);
   const loading = useSelector((state) => state.cart.loading);
-
+  const router = useRouter(); // ⬅️ initialize
   const [productDetails, setProductDetails] = useState({});
 
   useEffect(() => {
@@ -66,7 +67,6 @@ export default function CartPage() {
   };
 
   console.log("productDetails", productDetails);
-
 
   const total = cartItems.reduce((acc, item) => {
     const product = productDetails[item.product_id];
@@ -133,13 +133,24 @@ export default function CartPage() {
           </div>
 
           <div className="mt-6 flex justify-between items-center">
-            <p className="text-xl font-bold">Total: ₹{total.toFixed(2)}</p>
-            <button
-              onClick={handleClearCart}
-              className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
-            >
-              Clear Cart
-            </button>
+            <div>
+              <p className="text-xl font-bold">Total: ₹{total.toFixed(2)}</p>
+            </div>
+            <div>
+              <button
+                onClick={handleClearCart}
+                className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
+              >
+                Clear Cart
+              </button>
+
+              <button
+                onClick={() => router.push("/checkout")}
+                className="bg-[#FFB703] text-white px-4 py-2 rounded hover:bg-green-600 ml-4"
+              >
+                Proceed to Checkout
+              </button>
+            </div>
           </div>
         </>
       )}

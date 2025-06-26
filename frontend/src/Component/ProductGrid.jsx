@@ -34,7 +34,7 @@ export default function ProductGrid({ activeCategoryId }) {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
-  const cartItems = useSelector((state) => state.cart.items || []);
+  // const cartItems = useSelector((state) => state.cart.items || []);
 
 
   console.log("Wishlist Items:", wishlistItems);
