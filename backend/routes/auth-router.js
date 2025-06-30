@@ -13,6 +13,7 @@ const { getProductByCategory } = require('../controller/getProduct/getProductByC
 const { getProductById } = require('../controller/getProduct/getProductById');
 const wiishListController = require('../controller/wishList/wishlistController');
 const cartController = require('../controller/cart/cartController');
+const orderController = require('../controller/order/orderController');
 
 // Define routes for user registration and login
 router.post('/user/signup', userRegister.userSignUp);
@@ -49,5 +50,10 @@ router.put("/cart/update", verifyToken, cartController.updateCartItem);
 router.delete("/cart/remove", verifyToken, cartController.removeFromCart);
 router.post("/cart/clear", verifyToken, cartController.clearCart);
 router.post("/cart/merge", cartController.mergeCart);
+
+// Order routes
+router.post("/orders", verifyToken, orderController.createOrder);
+router.get("/orders/user/:user_id", verifyToken, orderController.getOrdersByUser);
+router.get("/orders/:order_id", verifyToken, orderController.getOrderDetails);
 
 module.exports = router;
