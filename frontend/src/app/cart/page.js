@@ -11,6 +11,7 @@ import {
 import { fetchProductById } from "@/app/store/productByIdSlice";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -93,18 +94,18 @@ export default function CartPage() {
                   className="flex items-center justify-between border p-4 rounded-md"
                 >
                   <div className="flex items-center gap-4">
-                    <Image
+                    <Link href={`product/${item.product_id}`}><Image
                       src={product?.image_url || "/placeholder.png"}
                       alt={product?.name || "Product"}
                       width={64}
                       height={64}
                       className="w-16 h-16 object-contain"
-                    />
+                    /></Link>
 
                     <div>
-                      <h2 className="font-semibold">
+                      <Link href={`product/${item.product_id}`}><h2 className="font-semibold">
                         {product?.name || "Product Name"}
-                      </h2>
+                      </h2></Link>
                       <p className="text-sm text-gray-600">
                         ₹{product?.price || 0} × {item.quantity}
                       </p>

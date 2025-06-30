@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // For App Router
 import { logout } from "@/app/store/authSlice";
-import { searchProducts } from "@/app/store/productByCatSlice";
 import { fetchWishlist } from "@/app/store/wishlistSlice";
 import { fetchCart } from "@/app/store/cartSlice";
 
@@ -41,28 +40,26 @@ export default function Header() {
     router.push("/Login");
   };
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    dispatch(searchProducts(value));
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter" && searchTerm.trim().length > 2) {
+      const query = searchTerm.trim();
+      setSearchTerm(""); // Clear input after submitting
+      router.push(`/search?query=${encodeURIComponent(query)}`);
+    }
   };
-
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
-      {/* Top Header */}
       <div className="flex items-center justify-between px-10 py-2 text-sm">
-        <div className="flex items-center space-x-2">
-          <Link href="/">
-            <Image
-              src="/assets/Softcon-Logo.png"
-              alt="Softcon Logo"
-              width={40}
-              height={40}
-              className="w-32 object-contain cursor-pointer"
-            />
-          </Link>
-        </div>
+        <Link href="/">
+          <Image
+            src="/assets/Softcon-Logo.png"
+            alt="Softcon Logo"
+            width={40}
+            height={40}
+            className="w-32 object-contain cursor-pointer"
+          />
+        </Link>
 
         <div className="hidden md:flex flex-col items-start text-gray-700">
           <div className="flex items-center space-x-2">
@@ -92,10 +89,9 @@ export default function Header() {
 
       <hr />
 
-      {/* Bottom Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-3 gap-4">
-        {/* Search */}
-        <div className="relative w-full md:max-w-sm">
+        {/* Search Bar */}
+        <div className="relative w-full md:max-w-lg">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pr-3 border-r border-black">
             <Search className="text-[#FFB703] w-5 h-5" />
           </div>
@@ -104,22 +100,18 @@ export default function Header() {
             placeholder="Type here to search..."
             className="pl-12 pr-4 py-2 rounded-full border border-black w-full focus:outline-none"
             value={searchTerm}
-            onChange={handleSearch}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
           />
         </div>
 
-        {/* Navigation Links */}
-        <nav
-          className={`${
-            menuOpen ? "flex" : "hidden"
-          } flex-col md:flex md:flex-row md:items-center md:space-x-7 font-bold text-lg text-[#044E78] space-y-2 md:space-y-0`}
-        >
-          <Link href="#">Technical Support</Link>
-          <Link href="#">How to Buy</Link>
-          <Link href="#">Contact</Link>
-          <Link href="#">Chat with Us</Link>
-          {!user && <Link href="/Login">Login</Link>}
-        </nav>
+        <div>
+          <ul className="flex gap-4 text-[#044E78] font-bold">
+            <li><Link href='/technical-support'>Technical Support</Link></li>
+            <li><Link href='/how-to-buy'>How To Buy</Link></li>
+            <li><Link href='/contact'>Contact</Link></li>
+          </ul>
+        </div>
 
         {/* Icons */}
         <div className="flex space-x-4 text-[#FFB703] relative justify-end items-center">
@@ -156,7 +148,6 @@ export default function Header() {
             </Link>
           )}
 
-          {/* Wishlist Icon */}
           <div className="relative">
             <Link href="/wishlist">
               <Heart className="w-5 h-5 cursor-pointer" />
@@ -167,7 +158,7 @@ export default function Header() {
               )}
             </Link>
           </div>
-          {/* Cart Icon */}
+
           <div className="relative">
             <Link href="/cart">
               <ShoppingCart className="w-5 h-5 cursor-pointer" />

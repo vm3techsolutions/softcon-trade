@@ -18,7 +18,7 @@ export default function Sidebar({ activeCategoryId, onCategorySelect }) {
   }, [dispatch]);
 
   return (
-    <div className="w-full md:w-2/5 bg-white p-4 border shadow-md rounded-xl h-full overflow-auto">
+    <div className="w-full bg-white p-4 border shadow-md rounded-xl h-full overflow-auto">
       {catLoading ? (
         <p className="text-gray-500">Loading categories...</p>
       ) : catError ? (

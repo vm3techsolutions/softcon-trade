@@ -14,6 +14,7 @@ import {
 } from "@/app/store/cartSlice"; // ✅ Import addToCart
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { HiOutlineChevronDoubleRight } from "react-icons/hi";
+import Link from "next/link";
 
 function truncateDescription(description, wordLimit = 12) {
   const words = description?.split(" ");
@@ -131,12 +132,9 @@ useEffect(() => {
       ) : products.length === 0 ? (
         <p className="text-gray-400">No products found for this category.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div
-              key={product.id}
-              className="relative border p-6 rounded-xl shadow hover:shadow-md transition flex flex-col justify-between"
-            >
+            <div key={product.id} className="relative border p-6 rounded-xl shadow hover:shadow-md transition flex flex-col justify-between overflow-hidden" >
               {/* Wishlist Icon */}
               <button
                 onClick={() => handleWishlistClick(product.id)}
@@ -177,12 +175,12 @@ useEffect(() => {
                 </p>
 
                 <div className="flex w-full gap-2 mt-auto">
-                  <button className="flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-blue-600 text-white px-1 py-1 font-bold rounded-2xl">
+                  <Link href={`/product/${product.id}`} className=" primaryButton flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] text-white px-1 py-1 font-bold rounded-2xl">
                     Know More <HiOutlineChevronDoubleRight size={14} />
-                  </button>
+                  </Link>
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-green-600 text-white px-1 py-1 font-bold rounded-2xl"
+                    className=" primaryButton flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-green-600 text-white px-1 py-1 font-bold rounded-2xl"
                   >
                     Add to Cart <FaShoppingCart size={14} />
                   </button>

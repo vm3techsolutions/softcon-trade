@@ -53,7 +53,7 @@ axiosInstance.interceptors.response.use(
         if (currentPath.startsWith("/admin")) {
           window.location.href = "/admin/login";
         } else {
-          window.location.href = "/login";
+          window.location.href = "/Login";
         }
       }
     }

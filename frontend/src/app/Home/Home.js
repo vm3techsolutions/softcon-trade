@@ -9,26 +9,34 @@ export default function Home() {
   const [activeCategoryId, setActiveCategoryId] = useState("all");
 
   return (
-    <section className="mx-12">
-      <div className="flex flex-col-reverse md:flex-row md:p-8 gap-12 md:h-[600px]">
+    <>
+      {/* Banner Image at Top */}
+      <div className="w-full relative h-[300px] md:h-[400px] overflow-hidden shadow-lg mb-6">
+        <Image
+          src="/assets/Sidebar-right.png"
+          alt="Industrial Automation Banner"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
+         <section className="mx-4 md:mx-12">
+    <div className="flex flex-col-reverse md:flex-row md:p-8 gap-12">
+      {/* Sticky Sidebar */}
+      <div className="md:w-1/4 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-auto">
         <Sidebar
           activeCategoryId={activeCategoryId}
           onCategorySelect={setActiveCategoryId}
         />
-        <div className="w-full relative h-[200px] md:h-full overflow-hidden shadow-lg mb-4 md:mb-8">
-          <Image
-            src="/assets/Sidebar-right.png"
-            alt="Industrial Automation"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
       </div>
 
-      <div className="w-full md:w-full">
+      {/* Main content area */}
+      <div className="w-full md:w-3/4">
         <ProductGrid activeCategoryId={activeCategoryId} />
       </div>
-    </section>
+    </div>
+  </section>
+
+    </>
   );
 }
