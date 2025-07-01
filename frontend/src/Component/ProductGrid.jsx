@@ -8,11 +8,8 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "@/app/store/wishlistSlice";
-import {
-  fetchCart,
-  addToCart,
-} from "@/app/store/cartSlice"; // ✅ Import addToCart
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { fetchCart, addToCart } from "@/app/store/cartSlice"; // ✅ Import addToCart
+import { FaHeart, FaShoppingCart, FaTag } from "react-icons/fa";
 import { HiOutlineChevronDoubleRight } from "react-icons/hi";
 import Link from "next/link";
 
@@ -37,9 +34,7 @@ export default function ProductGrid({ activeCategoryId }) {
 
   // const cartItems = useSelector((state) => state.cart.items || []);
 
-
   console.log("Wishlist Items:", wishlistItems);
-  
 
   const {
     data: products = [],
@@ -53,43 +48,39 @@ export default function ProductGrid({ activeCategoryId }) {
       dispatch(fetchProductsByCategory(activeCategoryId));
     }
   }, [activeCategoryId, dispatch]);
-  
 
-const handleAddToCart = (product) => {
-  const payload = {
-    userId,
-    product: {
-      product_id: product.id,
-      quantity: 1, // default to 1; can be made dynamic later
-    },
+  const handleAddToCart = (product) => {
+    const payload = {
+      userId,
+      product: {
+        product_id: product.id,
+        quantity: 1, // default to 1; can be made dynamic later
+      },
+    };
+
+    dispatch(addToCart(payload))
+      .unwrap()
+      .then(() => {
+        setPopupMessage(`✅ ${product.name} added to cart`);
+        setShowPopup(true);
+      })
+      .catch(() => {
+        setPopupMessage("❌ Failed to add item to cart");
+        setShowPopup(true);
+      });
+
+    setTimeout(() => {
+      setShowPopup(false);
+      setPopupMessage("");
+    }, 2000);
   };
 
-  dispatch(addToCart(payload))
-    .unwrap()
-    .then(() => {
-      setPopupMessage(`✅ ${product.name} added to cart`);
-      setShowPopup(true);
-    })
-    .catch(() => {
-      setPopupMessage("❌ Failed to add item to cart");
-      setShowPopup(true);
-    });
-
-  setTimeout(() => {
-    setShowPopup(false);
-    setPopupMessage("");
-  }, 2000);
-};
-
-
-// ✅ Fetch cart items when user is logged in
-useEffect(() => {
-  if (userId) {
-    dispatch(fetchCart(userId));
-  }
-}, [userId, dispatch]);
-
-
+  // ✅ Fetch cart items when user is logged in
+  useEffect(() => {
+    if (userId) {
+      dispatch(fetchCart(userId));
+    }
+  }, [userId, dispatch]);
 
   // Fetch wishlist when user ID is ready
   useEffect(() => {
@@ -121,10 +112,8 @@ useEffect(() => {
     }, 2000);
   };
 
-  
-
   return (
-    <div className="p-4">
+    <div className="p-2 md:p-4">
       {prodLoading || wishlistLoading ? (
         <p className="text-gray-500">Loading products...</p>
       ) : prodError ? (
@@ -134,7 +123,10 @@ useEffect(() => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="relative border p-6 rounded-xl shadow hover:shadow-md transition flex flex-col justify-between overflow-hidden" >
+            <div
+              key={product.id}
+              className="relative border p-3 md:p-6 rounded-md md:rounded-xl shadow hover:shadow-md transition flex flex-col justify-between overflow-hidden"
+            >
               {/* Wishlist Icon */}
               <button
                 onClick={() => handleWishlistClick(product.id)}
@@ -160,43 +152,50 @@ useEffect(() => {
                 />
               )}
 
-              <h3 className="text-md font-extrabold text-[#044E78]">
+              <h3 className="text-md md:text-lg font-bold text-[#044E78]">
                 {product.name}
               </h3>
 
-              <div className="text-yellow-500 text-xl mb-2">★★★★★</div>
+              {/* <div className="text-yellow-500 text-xl mb-2">★★★★★</div> */}
 
-                <p className="text-sm text-gray-600 mb-1">
-                  {truncateDescription(product.description)}
-                </p>
-
-                <p className="text-sm font-semibold text-gray-800 mb-2">
-                  Price: ₹ {product.price} / Piece
-                </p>
-
-                <div className="flex w-full gap-2 mt-auto">
-                  <Link href={`/product/${product.id}`} className=" primaryButton flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] text-white px-1 py-1 font-bold rounded-2xl">
-                    Know More <HiOutlineChevronDoubleRight size={14} />
-                  </Link>
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className=" primaryButton flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-green-600 text-white px-1 py-1 font-bold rounded-2xl"
-                  >
-                    Add to Cart <FaShoppingCart size={14} />
-                  </button>
-                </div>
+              <div className="text-[#FFB703] flex font-medium text-sm mb-2">
+                <FaTag className="mt-1 mr-1"/> {product.category}
               </div>
-            ))}
-          </div>
-        )}
 
-        {/* Popup */}
+              <p className="text-sm text-gray-600 mb-1">
+                {truncateDescription(product.description)}
+              </p>
+
+              <p className="text-sm font-semibold text-gray-800 mb-2">
+                Price: ₹ {product.price} / Piece
+              </p>
+
+              <div className="flex w-full gap-2 mt-auto">
+                <Link
+                  href={`/product/${product.id}`}
+                  className="primaryButton flex items-center justify-center gap-1 w-1/2 text-[12px] md:text-sm bg-[#FFB703] text-white px-1 py-1 font-bold rounded-2xl"
+                >
+                  Know More <HiOutlineChevronDoubleRight size={14} />
+                </Link>
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className=" primaryButton flex items-center justify-center gap-1 w-1/2 text-sm bg-[#FFB703] hover:bg-green-600 text-white px-1 py-1 font-bold rounded-2xl"
+                >
+                  <span className="hidden md:inline-block">Add to Cart</span> <FaShoppingCart size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Popup */}
       {showPopup && popupMessage && (
         <div className="fixed top-5 right-5 bg-white text-black shadow-lg border border-green-400 px-4 py-2 rounded-lg z-50 transition duration-300">
           {popupMessage}
         </div>
       )}
-      </div>
+    </div>
   );
 }
 // This component displays a grid of products based on the selected category.

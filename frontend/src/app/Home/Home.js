@@ -20,23 +20,22 @@ export default function Home() {
           priority
         />
       </div>
-         <section className="mx-4 md:mx-12">
-    <div className="flex flex-col-reverse md:flex-row md:p-8 gap-12">
-      {/* Sticky Sidebar */}
-      <div className="md:w-1/4 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-auto">
-        <Sidebar
-          activeCategoryId={activeCategoryId}
-          onCategorySelect={setActiveCategoryId}
-        />
-      </div>
+      <section className="mx-4 md:mx-12">
+        <div className="flex  md:flex-row md:p-8 gap-4 md:gap-12">
+          {/* Sticky Sidebar */}
+          <div className="md:w-1/4 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-auto">
+            <Sidebar
+              activeCategoryId={activeCategoryId}
+              onCategorySelect={setActiveCategoryId}
+            />
+          </div>
 
-      {/* Main content area */}
-      <div className="w-full md:w-3/4">
-        <ProductGrid activeCategoryId={activeCategoryId} />
-      </div>
-    </div>
-  </section>
-
+          {/* Main content area */}
+          <div className="w-full md:w-3/4">
+            <ProductGrid activeCategoryId={activeCategoryId} />
+          </div>
+        </div>
+      </section>
     </>
   );
 }

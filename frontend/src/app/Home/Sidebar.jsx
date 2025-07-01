@@ -18,7 +18,7 @@ export default function Sidebar({ activeCategoryId, onCategorySelect }) {
   }, [dispatch]);
 
   return (
-    <div className="w-full bg-white p-4 border shadow-md rounded-xl h-full overflow-auto">
+    <div className="w-full bg-white p-2 md:p-4 border shadow-md rounded-md md:rounded-xl h-full overflow-auto">
       {catLoading ? (
         <p className="text-gray-500">Loading categories...</p>
       ) : catError ? (
@@ -28,7 +28,7 @@ export default function Sidebar({ activeCategoryId, onCategorySelect }) {
           <li key="all" className="border-b border-gray-300">
             <button
               onClick={() => onCategorySelect("all")}
-              className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
+              className={`w-full text-left py-1 md:py-2 text-sm md:text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
                 activeCategoryId === "all"
                   ? "text-yellow-400"
                   : "bg-white hover:bg-gray-100"
@@ -41,7 +41,7 @@ export default function Sidebar({ activeCategoryId, onCategorySelect }) {
             <li key={category.id} className="border-b border-gray-300">
               <button
                 onClick={() => onCategorySelect(category.id)}
-                className={`w-full text-left py-2 text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
+                className={`w-full text-left py-1 md:py-2 text-sm md:text-lg font-bold transition-colors duration-200 text-[#044E78] cursor-pointer ${
                   activeCategoryId === category.id
                     ? "text-yellow-400"
                     : "bg-white hover:bg-gray-100"
