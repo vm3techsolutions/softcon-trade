@@ -94,20 +94,28 @@ export default function CartPage() {
                   className="flex items-center justify-between border p-4 rounded-md"
                 >
                   <div className="flex items-center gap-4">
-                    <Link href={`product/${item.product_id}`}><Image
-                      src={product?.image_url || "/placeholder.png"}
-                      alt={product?.name || "Product"}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-contain"
-                    /></Link>
+                    <Link href={`product/${item.product_id}`}>
+                      <Image
+                        src={product?.image_url || "/placeholder.png"}
+                        alt={product?.name || "Product"}
+                        width={64}
+                        height={64}
+                        className="w-16 h-16 object-contain"
+                      />
+                    </Link>
 
                     <div>
-                      <Link href={`product/${item.product_id}`}><h2 className="font-semibold">
-                        {product?.name || "Product Name"}
-                      </h2></Link>
+                      <Link href={`product/${item.product_id}`}>
+                        <h2 className="font-semibold">
+                          {product?.name || "Product Name"}
+                        </h2>
+                      </Link>
                       <p className="text-sm text-gray-600">
-                        ₹{product?.price || 0} × {item.quantity}
+                        ₹{" "}
+                        {product?.price
+                          ? Number(product.price).toLocaleString("en-IN")
+                          : "0"}{" "}
+                        × {item.quantity}
                       </p>
                     </div>
                   </div>

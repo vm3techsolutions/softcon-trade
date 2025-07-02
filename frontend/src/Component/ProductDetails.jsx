@@ -4,28 +4,31 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
-
+import { FaHeart, FaShoppingCart, FaTag } from "react-icons/fa";
 import { fetchProductById } from "@/app/store/productByIdSlice";
 import { fetchWishlist } from "@/app/store/wishlistSlice";
 import { fetchCart } from "@/app/store/cartSlice";
 import { fetchProductsByCategory } from "@/app/store/productByCatSlice";
-
 import useAddToCart from "@/app/hooks/useAddToCart";
 import { useWishlist } from "@/app/hooks/useWishlist";
-
-import ProductGrid from "@/Component/ProductGrid";
+import RelatedProducts from "./RelatedProducts";
+// import ProductGrid from "@/Component/ProductGrid";
 
 const ProductDetailsPage = () => {
   const { productId } = useParams();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { data: product, loading, error } = useSelector(
-    (state) => state.productById
-  );
+  const {
+    data: product,
+    loading,
+    error,
+  } = useSelector((state) => state.productById);
 
-  const relatedProducts = useSelector((state) => state.productsByCategory?.data || []);
+  const relatedProducts = useSelector(
+    (state) => state.products?.data || []
+  );
+  console.log("Related Products:", relatedProducts);
   const user = useSelector((state) => state.auth.user);
   const cartItems = useSelector((state) => state.cart.items);
 
@@ -88,8 +91,10 @@ const ProductDetailsPage = () => {
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
-  if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
-  if (!product) return <div className="text-center py-10">Product not found.</div>;
+  if (error)
+    return <div className="text-center py-10 text-red-600">{error}</div>;
+  if (!product)
+    return <div className="text-center py-10">Product not found.</div>;
 
   const images = product.gallery_images?.length
     ? product.gallery_images
@@ -114,7 +119,9 @@ const ProductDetailsPage = () => {
                 width={60}
                 height={60}
                 className={`cursor-pointer border ${
-                  selectedImage === img ? "border-blue-500" : "border-transparent"
+                  selectedImage === img
+                    ? "border-blue-500"
+                    : "border-transparent"
                 } rounded`}
                 onClick={() => setSelectedImage(img)}
               />
@@ -148,16 +155,24 @@ const ProductDetailsPage = () => {
         {/* Product details */}
         <div className="space-y-4">
           <h1 className="text-2xl font-bold text-[#044E78]">{product.name}</h1>
-          <p className="text-gray-700">{product.category}</p>
+          <div className="text-[#FFB703] flex font-medium text-sm mb-2">
+            <FaTag className="mt-1 mr-1" /> {product.category}
+          </div>{" "}
           <p className="text-xl text-green-600 font-semibold">
-            ₹{product.price} / 1 Piece
+            ₹
+            {product.price
+              ? Number(product.price).toLocaleString("en-IN")
+              : "0"}{" "}
+            / 1 Piece
           </p>
           <p className="text-gray-600">{product.description}</p>
-
           <p className="text-md font-semibold text-gray-700">
-            Total: ₹{product.price * quantity}
+            Total: ₹
+            {(product.price * quantity).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </p>
-
           <div className="flex items-center gap-3">
             <div className="flex items-center border rounded-full overflow-hidden p-2">
               <button
@@ -169,7 +184,9 @@ const ProductDetailsPage = () => {
               >
                 −
               </button>
-              <div className="px-4 w-10 text-center select-none">{quantity}</div>
+              <div className="px-4 w-10 text-center select-none">
+                {quantity}
+              </div>
               <button
                 onClick={() => setQuantity((prev) => prev + 1)}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-lg font-bold text-gray-900"
@@ -209,16 +226,10 @@ const ProductDetailsPage = () => {
       )}
 
       {/* Related Products */}
-      {/* {filteredRelatedProducts?.length > 0 ? (
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold text-[#044E78] mb-6">
-            Related Products
-          </h2>
-          <ProductGrid products={filteredRelatedProducts} />
-        </div>
-      ) : (
-        <div className="mt-10 text-gray-500">No related products found.</div>
-      )} */}
+      <RelatedProducts 
+      categoryId={product.category_id}
+      currentProductId={product.id}/>
+
     </div>
   );
 };

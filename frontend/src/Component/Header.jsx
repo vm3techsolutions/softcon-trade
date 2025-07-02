@@ -110,6 +110,7 @@ export default function Header() {
             <li><Link href='/technical-support'>Technical Support</Link></li>
             <li><Link href='/how-to-buy'>How To Buy</Link></li>
             <li><Link href='/contact'>Contact</Link></li>
+            <li><Link href='/Login'>Login</Link></li>
           </ul>
         </div>
 

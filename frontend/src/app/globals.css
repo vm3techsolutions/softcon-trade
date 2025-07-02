@@ -8,3 +8,7 @@
 .primaryButton:hover{
     background-color: #044E78;
 }
+
+button:hover{
+    cursor: pointer;
+}

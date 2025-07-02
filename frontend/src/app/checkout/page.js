@@ -14,10 +14,10 @@ export default function CheckoutPage() {
   const userId = user?.id || null;
 
   useEffect(() => {
-  if (!userId) {
-    router.push("/Login"); // Redirect to login if not logged in
-  }
-}, [userId, router]);
+    if (!userId) {
+      router.push("/Login"); // Redirect to login if not logged in
+    }
+  }, [userId, router]);
 
   const [productDetails, setProductDetails] = useState({});
   const [extraNote, setExtraNote] = useState("");
@@ -134,7 +134,10 @@ export default function CheckoutPage() {
           {cartItems.map((item) => {
             const product = productDetails[item.product_id];
             return (
-              <div key={item.product_id} className="flex items-center justify-between border-b pb-2">
+              <div
+                key={item.product_id}
+                className="flex items-center justify-between border-b pb-2"
+              >
                 <div className="flex items-center gap-3">
                   <Image
                     src={product?.image_url || "/placeholder.png"}
@@ -146,12 +149,20 @@ export default function CheckoutPage() {
                   <div>
                     <p className="font-medium">{product?.name}</p>
                     <p className="text-sm text-gray-600">
-                      ₹{product?.price} × {item.quantity}
+                      ₹{(product?.price || 0).toLocaleString("en-IN")} ×{" "}
+                      {item.quantity}
                     </p>
                   </div>
                 </div>
                 <p className="font-semibold">
-                  ₹{(product?.price * item.quantity).toFixed(2)}
+                  ₹
+                  {((product?.price || 0) * item.quantity).toLocaleString(
+                    "en-IN",
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}
                 </p>
               </div>
             );
@@ -162,23 +173,34 @@ export default function CheckoutPage() {
         <div className="mt-6 space-y-2 border-t pt-4 text-sm text-gray-700">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>₹{subtotal.toFixed(2)}</span>
+            <span>
+              ₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>CGST (9%):</span>
-            <span>₹{cgst.toFixed(2)}</span>
+            <span>
+              ₹{cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>SGST (9%):</span>
-            <span>₹{sgst.toFixed(2)}</span>
+            <span>
+              ₹{sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </span>
           </div>
           <div className="flex justify-between">
             <span>Shipping Charges:</span>
-            <span>₹{shipping.toFixed(2)}</span>
+            <span>
+              ₹{shipping.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </span>
           </div>
           <div className="flex justify-between font-bold text-lg border-t pt-3">
             <span>Total:</span>
-            <span>₹{grandTotal.toFixed(2)}</span>
+            <span>
+              ₹
+              {grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </span>
           </div>
         </div>
 
