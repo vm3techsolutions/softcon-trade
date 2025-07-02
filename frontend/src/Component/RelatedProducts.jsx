@@ -11,15 +11,14 @@ export default function RelatedProducts({ categoryId, currentProductId }) {
   const { data: relatedProducts, loading } = useSelector((state) => state.products);
 
   useEffect(() => {
-    if (categoryId) {
-      dispatch(fetchProductsByCategory(categoryId));
-    }
-  }, [dispatch, categoryId]);
+  if (categoryId) {
+    dispatch(fetchProductsByCategory(categoryId));
+  }
+}, [dispatch, categoryId]);
 
-  // Filter out the current product
-  const filteredProducts = relatedProducts.filter(
-    (product) => product.id !== currentProductId
-  );
+const filteredProducts = relatedProducts.filter(
+  (product) => product.id !== currentProductId
+);
 
   if (loading) return <p>Loading related products...</p>;
 

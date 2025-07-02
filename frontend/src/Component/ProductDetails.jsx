@@ -12,12 +12,15 @@ import { fetchProductsByCategory } from "@/app/store/productByCatSlice";
 import useAddToCart from "@/app/hooks/useAddToCart";
 import { useWishlist } from "@/app/hooks/useWishlist";
 import RelatedProducts from "./RelatedProducts";
+import { useSearchParams } from "next/navigation";
 // import ProductGrid from "@/Component/ProductGrid";
 
 const ProductDetailsPage = () => {
   const { productId } = useParams();
   const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryIdFromQuery  = searchParams.get("category_id");
 
   const {
     data: product,
@@ -75,11 +78,19 @@ const ProductDetailsPage = () => {
     }
   }, [product, cartItems]);
 
+  // useEffect(() => {
+  //   if (product?.category && product.category.trim()) {
+  //     dispatch(fetchProductsByCategory(product.category));
+  //   }
+  // }, [dispatch, product?.category]);
+
   useEffect(() => {
-    if (product?.category && product.category.trim()) {
-      dispatch(fetchProductsByCategory(product.category));
-    }
-  }, [dispatch, product?.category]);
+  const categoryIdToUse = product?.category_id || categoryIdFromQuery;
+  if (categoryIdToUse) {
+    dispatch(fetchProductsByCategory(categoryIdToUse));
+  }
+}, [dispatch, product?.category_id, categoryIdFromQuery]);
+
 
   const handleWishlistClick = () => {
     toggleWishlist(product.id, product.name);
@@ -226,9 +237,15 @@ const ProductDetailsPage = () => {
       )}
 
       {/* Related Products */}
-      <RelatedProducts 
+      {/* <RelatedProducts 
       categoryId={product.category_id}
-      currentProductId={product.id}/>
+      currentProductId={product.id}/> */}
+
+      <RelatedProducts
+  categoryId={product.category_id || categoryIdFromQuery}
+  currentProductId={product.id}
+/>
+
 
     </div>
   );

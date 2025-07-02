@@ -130,11 +130,10 @@ export default function ProductGrid({ activeCategoryId }) {
               {/* Wishlist Icon */}
               <button
                 onClick={() => handleWishlistClick(product.id)}
-                className={`absolute top-4 right-4 p-2 rounded-full bg-[#FFB703] hover:text-[#FFB703] hover:bg-amber-100 transition ${
-                  wishlistItems.includes(product.id)
+                className={`absolute top-4 right-4 p-2 rounded-full bg-[#FFB703] hover:text-[#FFB703] hover:bg-amber-100 transition ${wishlistItems.includes(product.id)
                     ? "text-red-500"
                     : "text-white"
-                }`}
+                  }`}
                 title={
                   wishlistItems.includes(product.id)
                     ? "Remove from wishlist"
@@ -159,7 +158,7 @@ export default function ProductGrid({ activeCategoryId }) {
               {/* <div className="text-yellow-500 text-xl mb-2">★★★★★</div> */}
 
               <div className="text-[#FFB703] flex font-medium text-sm mb-2">
-                <FaTag className="mt-1 mr-1"/> {product.category}
+                <FaTag className="mt-1 mr-1" /> {product.category}
               </div>
 
               <p className="text-[12px] md:text-sm text-gray-600 mb-1">
@@ -172,10 +171,11 @@ export default function ProductGrid({ activeCategoryId }) {
 
               <div className="flex w-full gap-2 mt-auto">
                 <Link
-                  href={`/product/${product.id}`}
+                  // href={`/product/${product.id}`}
+                  href={`/product/${product.id}?category_id=${product.category_ids?.[0] || product.category_id || ""}`}
                   className="primaryButton flex items-center justify-center gap-1 w-1/2 text-[12px] md:text-sm bg-[#FFB703] text-white px-1 py-2 md:font-bold rounded-2xl"
                 >
-                  <span className="hidden md:inline-block">Know More</span> <FaEye size={16} className="block md:hidden"/> <HiChevronDoubleRight  size={18} className="hidden md:inline-block md:mt-1"/>
+                  <span className="hidden md:inline-block">Know More</span> <FaEye size={16} className="block md:hidden" /> <HiChevronDoubleRight size={18} className="hidden md:inline-block md:mt-1" />
                 </Link>
                 <button
                   onClick={() => handleAddToCart(product)}
