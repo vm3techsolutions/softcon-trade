@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Sidebar from '@/Component/Sidebar';
-import Profile from './profile/page';
-import Wishlist from './wishlist/page';
+import Profile from './profile/page.js';
+import Wishlist from './wishlist/page.js';
 
 const DashboardLayout = () => {
   const [activeTab, setActiveTab] = useState('profile');
