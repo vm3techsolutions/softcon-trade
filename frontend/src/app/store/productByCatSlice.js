@@ -7,10 +7,10 @@ export const fetchProductsByCategory = createAsyncThunk(
   "products/fetchByCategory",
   async (categoryId) => {
     if (!categoryId || categoryId === "all") {
-      const res = await axiosInstance.get("/getAllProducts");
+      const res = await axiosInstance.get("/api/getAllProducts");
       return res.data;
     }
-    const res = await axiosInstance.get(`/products/category/${categoryId}`);
+    const res = await axiosInstance.get(`/api/products/category/${categoryId}`);
     return res.data;
   }
 );

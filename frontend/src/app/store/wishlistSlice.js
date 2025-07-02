@@ -3,19 +3,19 @@ import axiosInstance from "../api/axiosInstance";
 
 // ✅ Fetch wishlist
 export const fetchWishlist = createAsyncThunk("wishlist/fetch", async (userId) => {
-  const response = await axiosInstance.get(`/wishlist/${userId}`);
+  const response = await axiosInstance.get(`/api/wishlist/${userId}`);
   return response.data; // e.g. [1, 5, 7]
 });
 
 // ✅ Add to wishlist
 export const addToWishlist = createAsyncThunk("wishlist/add", async ({ userId, productId }) => {
-  await axiosInstance.post("/wishlist/add", { user_id: userId, product_id: productId });
+  await axiosInstance.post("/api/wishlist/add", { user_id: userId, product_id: productId });
   return productId;
 });
 
 // ✅ Remove from wishlist
 export const removeFromWishlist = createAsyncThunk("wishlist/remove", async ({ userId, productId }) => {
-  await axiosInstance.delete("/wishlist/remove", {
+  await axiosInstance.delete("/api/wishlist/remove", {
     data: { user_id: userId, product_id: productId },
   });
   return productId;
