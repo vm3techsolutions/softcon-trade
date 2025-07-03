@@ -122,6 +122,260 @@ const addProduct = (req, res) => {
   });
 };
 
+// Update Product
+// const updateProduct = async (req, res) => {
+//   let { name, description, price, stock, category_id, subcategory_id } = req.body;
+//   const files = req.files || [];
+//   const file = files.length > 0 ? files[0] : null;
+//   const { id } = req.params;
+
+//   subcategory_id = !subcategory_id || subcategory_id === "NULL" ? null : subcategory_id;
+
+//   db.query("SELECT name FROM categories WHERE id = ?", [category_id], async (err, categoryData) => {
+//     if (err) {
+//       console.error("DB Error:", err);
+//       return res.status(500).json({ error: "Database error" });
+//     }
+
+//     if (!categoryData.length) {
+//       return res.status(400).json({ error: "Invalid category ID" });
+//     }
+
+//     const category = categoryData[0].name;
+//     const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
+
+//     let image_url = req.body.image_url; // fallback to existing image if not uploading new
+//     if (file) {
+//       try {
+//         image_url = await uploadToS3(file, categorySlug);
+//       } catch (mainErr) {
+//         console.error("Main Image Upload Failed:", mainErr);
+//         return res.status(500).json({ error: "Main image upload failed" });
+//       }
+//     }
+
+//     const slugify = (text) =>
+//       text.toString().toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+//     const slug = slugify(name);
+
+//     db.query(
+//       "UPDATE products SET name=?, slug=?, description=?, price=?, stock=?, image_url=?, category=? WHERE id=?",
+//       [name, slug, description, price, stock, image_url, category, id],
+//       (err) => {
+//         if (err) {
+//           console.error("Update Product Error:", err);
+//           return res.status(500).json({ error: "Failed to update product" });
+//         }
+
+//         // Update product_categories
+//         db.query("DELETE FROM product_categories WHERE product_id = ?", [id], (err) => {
+//           if (err) {
+//             console.error("Delete old categories error:", err);
+//           }
+//           db.query(
+//             "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+//             [id, category_id],
+//             (err) => {
+//               if (err) {
+//                 console.error("Insert main category error:", err);
+//               }
+//               if (subcategory_id) {
+//                 db.query(
+//                   "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+//                   [id, subcategory_id],
+//                   (err) => {
+//                     if (err) {
+//                       console.error("Insert subcategory error:", err);
+//                     }
+//                   }
+//                 );
+//               }
+//             }
+//           );
+//         });
+
+//         // Handle additional images (optional: clear and re-add, or just add new)
+//         const additionalImages = files.slice(1);
+//         if (additionalImages.length > 0) {
+//           additionalImages.forEach(async (img) => {
+//             try {
+//               const imageUrl = await uploadToS3(img, categorySlug);
+//               db.query(
+//                 "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+//                 [id, imageUrl],
+//                 (err) => {
+//                   if (err) {
+//                     console.error("Insert product image error:", err);
+//                   }
+//                 }
+//               );
+//             } catch (imgErr) {
+//               console.error("Extra image upload failed:", imgErr);
+//             }
+//           });
+//         }
+
+//         return res.json({ success: true, message: "Product updated!" });
+//       }
+//     );
+//   });
+// };
+
+const updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const files = req.files || [];
+  const file = files.length > 0 ? files[0] : null;
+  const additionalImages = files.slice(1);
+
+  const {
+    name,
+    description,
+    price,
+    stock,
+    category_id,
+    subcategory_id: rawSubcategoryId,
+    image_url: fallbackImageUrl,
+  } = req.body;
+
+  const subcategory_id = !rawSubcategoryId || rawSubcategoryId === "NULL" ? null : rawSubcategoryId;
+
+  // Get current product
+  db.query("SELECT * FROM products WHERE id = ?", [id], async (err, productResult) => {
+    if (err || !productResult.length) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const existing = productResult[0];
+
+    const updatedName = name || existing.name;
+    const updatedDescription = description || existing.description;
+    const updatedPrice = price || existing.price;
+    const updatedStock = stock || existing.stock;
+    const updatedCategoryId = category_id || existing.category_id;
+    let finalImageUrl = fallbackImageUrl || existing.image_url;
+
+    // Get category name if updated or fallback to existing
+    const resolveCategory = () =>
+      new Promise((resolve, reject) => {
+        if (category_id) {
+          db.query("SELECT name FROM categories WHERE id = ?", [updatedCategoryId], (err, catRes) => {
+            if (err) return reject("DB error validating category");
+            if (!catRes.length) return reject("Invalid category ID");
+            return resolve(catRes[0].name);
+          });
+        } else {
+          resolve(existing.category); // fallback to existing category name
+        }
+      });
+
+    try {
+      const category = await resolveCategory();
+      const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
+
+      // Upload main image if new one is sent
+      if (file) {
+        try {
+          finalImageUrl = await uploadToS3(file, categorySlug);
+        } catch (uploadErr) {
+          console.error("Main image upload failed:", uploadErr);
+          return res.status(500).json({ error: "Main image upload failed" });
+        }
+      }
+
+      const slugify = (text) =>
+        text.toString().toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+      const slug = slugify(updatedName);
+
+      // Update product
+      db.query(
+        `UPDATE products SET name=?, slug=?, description=?, price=?, stock=?, image_url=?, category=? WHERE id=?`,
+        [updatedName, slug, updatedDescription, updatedPrice, updatedStock, finalImageUrl, category, id],
+        (err) => {
+          if (err) {
+            console.error("Product update failed:", err);
+            return res.status(500).json({ error: "Failed to update product" });
+          }
+
+          // Update product_categories if category_id/subcategory_id was provided
+          if (category_id || subcategory_id) {
+            db.query("DELETE FROM product_categories WHERE product_id = ?", [id], (err) => {
+              if (err) console.error("Delete product categories failed:", err);
+
+              if (category_id) {
+                db.query(
+                  "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+                  [id, updatedCategoryId],
+                  (err) => {
+                    if (err) console.error("Insert main category failed:", err);
+                  }
+                );
+              }
+
+              if (subcategory_id) {
+                db.query(
+                  "INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)",
+                  [id, subcategory_id],
+                  (err) => {
+                    if (err) console.error("Insert subcategory failed:", err);
+                  }
+                );
+              }
+            });
+          }
+
+          // Add additional images if any
+          if (additionalImages.length > 0) {
+            additionalImages.forEach(async (img) => {
+              try {
+                const imageUrl = await uploadToS3(img, categorySlug);
+                db.query(
+                  "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+                  [id, imageUrl],
+                  (err) => {
+                    if (err) console.error("Insert extra image failed:", err);
+                  }
+                );
+              } catch (err) {
+                console.error("Additional image upload failed:", err);
+              }
+            });
+          }
+
+          return res.json({ success: true, message: "Product updated!" });
+        }
+      );
+    } catch (errorMsg) {
+      return res.status(400).json({ error: errorMsg });
+    }
+  });
+};
+
+
+// Remove Product
+const removeProduct = (req, res) => {
+  const { id } = req.params;
+  // Remove product, its categories, and images
+  db.query("DELETE FROM product_images WHERE product_id = ?", [id], (err) => {
+    if (err) {
+      console.error("Delete product images error:", err);
+    }
+    db.query("DELETE FROM product_categories WHERE product_id = ?", [id], (err) => {
+      if (err) {
+        console.error("Delete product categories error:", err);
+      }
+      db.query("DELETE FROM products WHERE id = ?", [id], (err) => {
+        if (err) {
+          console.error("Delete product error:", err);
+          return res.status(500).json({ error: "Failed to delete product" });
+        }
+        return res.json({ success: true, message: "Product deleted!" });
+      });
+    });
+  });
+};
+
 module.exports = {
   addProduct,
+  updateProduct,
+  removeProduct,
 };

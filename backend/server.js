@@ -8,7 +8,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONT_END_URL || "http://localhost:3000",
+  origin: process.env.FRONT_END_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
