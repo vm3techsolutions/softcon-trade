@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
   `;
 
   await transporter.sendMail({
-    from: `InternScope <${process.env.EMAIL_USER}>`, // Fixed template literal syntax
+    from: `Softcon-Trade <${process.env.EMAIL_USER}>`, // Fixed template literal syntax
     to,
     subject,
     html: htmlContent,

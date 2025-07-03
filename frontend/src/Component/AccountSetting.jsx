@@ -18,7 +18,7 @@ const AccountSettings = () => {
       return;
     }
 
-    const res = await fetch('/update-password', {
+    const res = await fetch('/api/update-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(passwords),

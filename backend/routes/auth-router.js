@@ -5,7 +5,7 @@ const verifyToken = require('../middleware/auth');
 const userRegister = require('../controller/userRegister/register');
 const userGetData = require('../controller/userGetData/userGetData');
 const adminRegister = require('../controller/adminRegister/adminRegister');
-const addProductsController = require('../controller/addProducts/addProducts');
+const { addProduct } = require('../controller/addProducts/addProducts');
 const upload = require('../middleware/upload');
 const { getCategories } = require('../controller/Categories/getCategories');
 const { getAllProducts } = require('../controller/getProduct/getAllProduct');
@@ -18,10 +18,6 @@ const orderController = require('../controller/order/orderController');
 // Define routes for user registration and login
 router.post('/user/signup', userRegister.userSignUp);
 router.post('/user/login', userRegister.userLogin);
-
-// Password reset routes
-router.post("/forgot-password", userRegister.forgotPassword);
-router.post("/reset-password", userRegister.resetPassword);
 // Define route for getting user data
 router.get('/user/getData/:id', verifyToken, userGetData.userGetData);
 
@@ -31,14 +27,7 @@ router.post('/admin/login', adminRegister.adminLogin);
 router.get('/admin/getData/:id', verifyToken, adminRegister.getAdminData);
 
 // add products
-router.post("/admin/addProduct", verifyToken ,upload.array("image", 10), addProductsController.addProduct);
-
-// Update product (PUT): /api/products/:id
-router.put("/products/:id", verifyToken, upload.array("image", 10), addProductsController.updateProduct);
-
-// Remove product (DELETE): /api/products/:id
-router.delete("/products/:id",verifyToken, addProductsController.removeProduct);
-
+router.post("/admin/addProduct", verifyToken ,upload.array("image", 10), addProduct);
 // Get all products
 router.get('/getAllProducts', getAllProducts);
 // Get product by category
@@ -66,6 +55,5 @@ router.post("/cart/merge", cartController.mergeCart);
 router.post("/orders", verifyToken, orderController.createOrder);
 router.get("/orders/user/:user_id", verifyToken, orderController.getOrdersByUser);
 router.get("/orders/:order_id", verifyToken, orderController.getOrderDetails);
-
 
 module.exports = router;
