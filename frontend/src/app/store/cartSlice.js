@@ -7,7 +7,7 @@ export const fetchCart = createAsyncThunk("cart/fetch", async (userId) => {
     const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
     return guestCart;
   } else {
-    const response = await axiosInstance.get(`/api/cart/${userId}`);
+    const response = await axiosInstance.get(`/cart/${userId}`);
     return response.data;
   }
 });
@@ -27,7 +27,7 @@ export const addToCart = createAsyncThunk("cart/add", async ({ userId, product }
     localStorage.setItem("guest_cart", JSON.stringify(localCart));
     return { ...product, quantity, guest: true };
   } else {
-    const response = await axiosInstance.post("/api/cart/add", {
+    const response = await axiosInstance.post("/cart/add", {
       user_id: userId,
       product_id: product.product_id,
       quantity,
@@ -42,14 +42,14 @@ export const mergeGuestCart = createAsyncThunk("cart/merge", async (userId, { di
   const guestCart = JSON.parse(localStorage.getItem("guest_cart")) || [];
 
   if (guestCart.length > 0 && userId) {
-    await axiosInstance.post("/api/cart/merge", {
+    await axiosInstance.post("/cart/merge", {
       userId,
       items: guestCart,
     });
 
     localStorage.removeItem("guest_cart");
 
-    const response = await axiosInstance.get(`/api/cart/${userId}`);
+    const response = await axiosInstance.get(`/cart/${userId}`);
     return response.data;
   }
 
@@ -66,7 +66,7 @@ export const updateCartItem = createAsyncThunk("cart/update", async ({ userId, p
     localStorage.setItem("guest_cart", JSON.stringify(updatedCart));
     return { productId, quantity };
   } else {
-    await axiosInstance.put("/api/cart/update", {
+    await axiosInstance.put("/cart/update", {
       user_id: userId,
       product_id: productId,
       quantity,
@@ -83,7 +83,7 @@ export const removeFromCart = createAsyncThunk("cart/remove", async ({ userId, p
     localStorage.setItem("guest_cart", JSON.stringify(updatedCart));
     return productId;
   } else {
-    await axiosInstance.delete("/api/cart/remove", {
+    await axiosInstance.delete("/cart/remove", {
       data: { user_id: userId, product_id: productId },
     });
     return productId;
@@ -96,7 +96,7 @@ export const clearCart = createAsyncThunk("cart/clear", async (userId) => {
     localStorage.removeItem("guest_cart");
     return true;
   } else {
-    await axiosInstance.post("/api/cart/clear", { user_id: userId });
+    await axiosInstance.post("/cart/clear", { user_id: userId });
     return true;
   }
 });

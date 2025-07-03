@@ -28,7 +28,7 @@ const AdminLoginForm = () => {
     setError("");
 
     try {
-      const response = await axiosInstance.post("/api/admin/login", formData);
+      const response = await axiosInstance.post("/admin/login", formData);
       const { token, admin } = response.data;
       dispatch(adminLoginSuccess({ admin, token }));
 
