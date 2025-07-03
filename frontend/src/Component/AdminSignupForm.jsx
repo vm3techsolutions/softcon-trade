@@ -17,7 +17,7 @@ const AdminSignupForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post("/api/admin/signup", formData);
+      const res = await axiosInstance.post("/admin/signup", formData);
       dispatch(adminSignupSuccess(res.data));
       router.push("/admin/dashboard");
     } catch (err) {

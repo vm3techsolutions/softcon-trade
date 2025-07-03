@@ -26,7 +26,7 @@ const Profile = () => {
       if (!user?.id) return;
 
       try {
-        const res = await axiosInstance.get(`/api/user/getData/${user.id}`);
+        const res = await axiosInstance.get(`/user/getData/${user.id}`);
         console.log('User data:', res.data);
 
         if (res.data?.user) {
@@ -60,7 +60,7 @@ const Profile = () => {
   const handleSave = async () => {
     if (!user?.id) return alert('User not authenticated');
     try {
-      await axiosInstance.put(`/api/user/getData/${user.id}`, userData);
+      await axiosInstance.put(`/user/getData/${user.id}`, userData);
       alert('Profile updated successfully!');
       setEditing(false);
       setOriginalData(userData);

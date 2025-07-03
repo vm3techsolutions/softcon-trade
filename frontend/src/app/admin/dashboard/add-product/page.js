@@ -22,7 +22,7 @@ const AddProductForm = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axiosInstance.get('/api/categories');
+        const res = await axiosInstance.get('/categories');
         setCategories(res.data);
       } catch (err) {
         console.error('Error fetching categories:', err);
@@ -68,7 +68,7 @@ const AddProductForm = () => {
     galleryImages.forEach((img) => data.append('image', img));
 
     try {
-      await axiosInstance.post('/api/admin/addProduct', data, {
+      await axiosInstance.post('/admin/addProduct', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
