@@ -10,31 +10,32 @@ const useAddToCart = () => {
   const [showPopupCart, setShowPopupCart] = useState(false);
   const [popupMessageCart, setPopupMessageCart] = useState("");
 
- const handleAddToCart = (product) => {
+  const handleAddToCart = (product, quantity = 1) => {
   const payload = {
     userId,
     product: {
       product_id: product.id,
-      quantity: 1, // default to 1; can be made dynamic later
+      quantity,
+      ...product, // include name, price etc.
     },
   };
 
-  dispatch(addToCart(payload))
-    .unwrap()
-    .then(() => {
-      setPopupMessageCart(`✅ ${product.name} added to cart`);
-      setShowPopupCart(true);
-    })
-    .catch(() => {
-      setPopupMessageCart("❌ Failed to add item to cart");
-      setShowPopupCart(true);
-    });
+    dispatch(addToCart(payload))
+      .unwrap()
+      .then(() => {
+        setPopupMessageCart(`✅ ${product.name} added to cart`);
+        setShowPopupCart(true);
+      })
+      .catch(() => {
+        setPopupMessageCart("❌ Failed to add item to cart");
+        setShowPopupCart(true);
+      });
 
-  setTimeout(() => {
-    setShowPopupCart(false);
-    setPopupMessageCart("");
-  }, 2000);
-};
+    setTimeout(() => {
+      setShowPopupCart(false);
+      setPopupMessageCart("");
+    }, 2000);
+  };
 
   const hidePopup = () => {
     setTimeout(() => {
