@@ -19,7 +19,7 @@ export const deleteProduct = createAsyncThunk(
   "products/delete",
   async (id, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/admin/removeProduct/${id}`);
+      await axiosInstance.delete(`/products/${id}`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.error || "Failed to delete product");
@@ -32,7 +32,7 @@ export const updateProduct = createAsyncThunk(
   "products/update",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.put(`/updateProduct/${id}`, formData, {
+      const res = await axiosInstance.put(`/products/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;

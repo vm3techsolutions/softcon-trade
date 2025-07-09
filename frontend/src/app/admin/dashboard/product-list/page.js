@@ -1,11 +1,13 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProducts, deleteProduct } from '@/app/store/productsSlice';
 import axiosInstance from '@/app/api/axiosInstance';
+import EditProduct from '../edit-product/page';
 
 export default function ProductList() {
   const dispatch = useDispatch();
+  const [editingProductId, setEditingProductId] = useState(null);
   const { products, loading, error } = useSelector((state) => state.allProducts);
 
   useEffect(() => {
@@ -25,9 +27,18 @@ export default function ProductList() {
   };
 
   const handleEdit = (id) => {
-    alert(`Edit product with ID: ${id}`);
-    // Implement navigation or modal for editing here
+    setEditingProductId(id);
   };
+
+  const handleBackToList = () => {
+    setEditingProductId(null);
+    dispatch(fetchAllProducts());
+  };
+
+  if (editingProductId) {
+
+    return <EditProduct productId={editingProductId} onBack={handleBackToList} />;
+  }
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
