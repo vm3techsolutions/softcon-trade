@@ -1,107 +1,74 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProduct } from "@/app/store/productsSlice";
-import { fetchProductById } from "@/app/store/productByIdSlice";
+import {fetchProductById} from "@/app/store/productByIdSlice";
 import { fetchCategories } from "@/app/store/categorySlice";
 
 const EditProduct = ({ productId, onBack }) => {
-  const router = useRouter();
   const dispatch = useDispatch();
-
-  const { data: categories, loading: categoriesLoading, error: categoriesError } = useSelector((state) => state.categories);
-
   const [loading, setLoading] = useState(true);
-  const [subcategories, setSubcategories] = useState([]);
-  const [mainImage, setMainImage] = useState(null);
-  const [galleryImages, setGalleryImages] = useState([]);
+  const [product, setProduct] = useState(null);
+  const [galleryPreviews, setGalleryPreviews] = useState(Array(5).fill(null));
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    category_id: "",
-    subcategory_id: "",
-  });
+  const { data: categories, loading: categoriesLoading } = useSelector(
+    (state) => state.categories
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadProduct = async () => {
       try {
         await dispatch(fetchCategories()).unwrap();
-        const product = await dispatch(fetchProductById(productId)).unwrap();
-
-        const subs = product.category_id
-          ? categories.filter((sub) => sub.parent_id == product.category_id)
-          : [];
-
-        setSubcategories(subs);
-
-        setFormData({
-          name: product.name || "",
-          description: product.description || "",
-          price: product.price || "",
-          stock: product.stock || "",
-          category_id: product.category_id?.toString() || "",
-          subcategory_id: product.subcategory_id?.toString() || "",
-        });
-
-        setLoading(false);
+        const result = await dispatch(fetchProductById(productId)).unwrap();
+        setProduct(result);
+        setGalleryPreviews(result.productGallery || Array(5).fill(null));
       } catch (error) {
-        console.error("Error loading data:", error);
+        console.error("Failed to fetch product", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (productId) {
-      fetchData();
+      loadProduct();
     }
-  }, [productId, dispatch, categories.length]);
-
-  const parentCategories = categories.filter((cat) => cat.parent_id === null || cat.parent_id === 0);
-  const allSubcategories = categories.filter((cat) => cat.parent_id !== null);
+  }, [productId, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setProduct((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-    if (name === "category_id") {
-      setFormData((prev) => ({
-        ...prev,
-        category_id: value,
-        subcategory_id: "",
-      }));
-      const filteredSub = allSubcategories.filter((sub) => sub.parent_id == value);
-      setSubcategories(filteredSub);
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+  const handleGalleryImageChange = (index, file) => {
+    const newGallery = [...(product.productGallery || [])];
+    const updatedGalleryPreviews = [...galleryPreviews];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newGallery[index] = reader.result;
+        updatedGalleryPreviews[index] = reader.result;
+        setProduct((prev) => ({
+          ...prev,
+          productGallery: newGallery,
+        }));
+        setGalleryPreviews(updatedGalleryPreviews);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
-    });
-
-    if (mainImage) {
-      data.append("image", mainImage);
-    }
-
-    galleryImages.forEach((img) => data.append("image", img));
-
+  const handleUpdateProduct = async () => {
     try {
-      await dispatch(updateProduct({ id: productId, formData: data })).unwrap();
+      await dispatch(updateProduct({ id: productId, updatedProduct: product })).unwrap();
       alert("Product updated successfully!");
-      onBack();
-    } catch (error) {
-      console.error("Update failed:", error);
-      alert("Failed to update product.");
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Update failed");
     }
   };
 
@@ -109,154 +76,171 @@ const EditProduct = ({ productId, onBack }) => {
     return <div className="text-center py-10">Loading...</div>;
   }
 
+  if (!product) {
+    return <div className="text-center py-10 text-red-600">Product not found.</div>;
+  }
+
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white shadow rounded">
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
       <div className="mb-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-blue-600 hover:underline"
-        >
+        <button onClick={onBack} className="text-blue-600 hover:underline">
           ← Back to Product List
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <table className="w-full table-auto space-y-4">
-          <tbody className="divide-y">
-            {/* Product Fields */}
-            <tr>
-              <td className="py-2 font-medium w-1/3">Product Name:</td>
-              <td className="py-2">
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-2 font-medium">Description:</td>
-              <td className="py-2">
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={5}
-                  className="w-full border p-2 rounded"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-2 font-medium">Price:</td>
-              <td className="py-2">
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  step="0.01"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-2 font-medium">Stock:</td>
-              <td className="py-2">
-                <input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-2 font-medium">Category:</td>
-              <td className="py-2">
-                <select
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {parentCategories.map((cat) => (
-                    <option key={cat.id} value={String(cat.id)}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </td>
-            </tr>
+      <h2 className="text-xl font-bold mb-4">Edit Product Details</h2>
 
-            {subcategories.length > 0 && (
-              <tr>
-                <td className="py-2 font-medium">Subcategory:</td>
-                <td className="py-2">
-                  <select
-                    name="subcategory_id"
-                    value={formData.subcategory_id}
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  >
-                    <option value="">Select Subcategory</option>
-                    {subcategories.map((sub) => (
-                      <option key={sub.id} value={sub.id}>
-                        {sub.name}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            )}
+      <table className="table-auto w-full text-left border">
+        <tbody>
+          <tr className="border-t">
+            <td className="p-2 font-semibold">Name</td>
+            <td className="p-2">
+              <input
+                type="text"
+                name="name"
+                value={product.name || ""}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr>
 
-            {/* Images */}
-            <tr>
-              <td className="py-2 font-medium">Product Image:</td>
-              <td className="py-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setMainImage(e.target.files[0])}
-                  className="w-full border p-2 rounded"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="py-2 font-medium">Product Gallery:</td>
-              <td className="py-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => setGalleryImages(Array.from(e.target.files))}
-                  className="w-full border p-2 rounded"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-              <td className="pt-4">
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Update Product
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
+          <tr className="border-t">
+            <td className="p-2 font-semibold">Description</td>
+            <td className="p-2">
+              <textarea
+                name="description"
+                value={product.description || ""}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr>
+
+          <tr className="border-t">
+            <td className="p-2 font-semibold">Price</td>
+            <td className="p-2">
+              <input
+                type="number"
+                name="price"
+                value={product.price || ""}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr>
+
+          <tr className="border-t">
+            <td className="p-2 font-semibold">Stock</td>
+            <td className="p-2">
+              <input
+                type="number"
+                name="stock"
+                value={product.stock || ""}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              />
+            </td>
+          </tr>
+
+          <tr className="border-t">
+            <td className="p-2 font-semibold">Category</td>
+            <td className="p-2">
+              <select
+                name="category"
+                value={product.category || ""}
+                onChange={handleChange}
+                className="w-full border p-2 rounded"
+              >
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+          </tr>
+
+          <tr className="border-t">
+  <td className="p-2 font-semibold align-top">Product Image</td>
+  <td className="p-2">
+    {product.image_url ? (
+      <Image
+        src={product.image_url}
+        alt="Main"
+        width={125}
+        height={125}
+        className="rounded border mb-2"
+      />
+    ) : (
+      <div className="mb-2 text-gray-500">No image</div>
+    )}
+
+    {/* Upload and Replace Image */}
+    <input
+      type="file"
+      accept="image/*"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setProduct((prev) => ({
+              ...prev,
+              image_url: reader.result, // set Base64 string
+            }));
+          };
+          reader.readAsDataURL(file);
+        }
+      }}
+      className="mb-2"
+    />
+  </td>
+</tr>
+
+
+          <tr className="border-t">
+            <td className="p-2 font-semibold align-top">Gallery Images</td>
+            <td className="p-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex flex-col items-start gap-2">
+                    {galleryPreviews[i] ? (
+                      <Image
+                        src={galleryPreviews[i]}
+                        alt={`Gallery ${i + 1}`}
+                        width={100}
+                        height={100}
+                        className="border rounded"
+                      />
+                    ) : (
+                      <div className="w-[100px] h-[100px] border rounded flex items-center justify-center text-gray-400 text-sm">
+                        No Image
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        handleGalleryImageChange(i, e.target.files?.[0])
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={handleUpdateProduct}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          Update Product
+        </button>
+      </div>
     </div>
   );
 };
