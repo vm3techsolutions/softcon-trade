@@ -3,14 +3,14 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProduct } from "@/app/store/productsSlice";
-import {fetchProductById} from "@/app/store/productByIdSlice";
+import { fetchProductById } from "@/app/store/productByIdSlice";
 import { fetchCategories } from "@/app/store/categorySlice";
 
 const EditProduct = ({ productId, onBack }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
-  const [galleryPreviews, setGalleryPreviews] = useState(Array(5).fill(null));
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
 
   const { data: categories, loading: categoriesLoading } = useSelector(
     (state) => state.categories
@@ -21,8 +21,11 @@ const EditProduct = ({ productId, onBack }) => {
       try {
         await dispatch(fetchCategories()).unwrap();
         const result = await dispatch(fetchProductById(productId)).unwrap();
-        setProduct(result);
-        setGalleryPreviews(result.productGallery || Array(5).fill(null));
+
+        const gallery = result.gallery_images || [];
+
+        setProduct({ ...result, productGallery: gallery });
+        setGalleryPreviews(gallery);
       } catch (error) {
         console.error("Failed to fetch product", error);
       } finally {
@@ -30,9 +33,7 @@ const EditProduct = ({ productId, onBack }) => {
       }
     };
 
-    if (productId) {
-      loadProduct();
-    }
+    if (productId) loadProduct();
   }, [productId, dispatch]);
 
   const handleChange = (e) => {
@@ -43,28 +44,44 @@ const EditProduct = ({ productId, onBack }) => {
     }));
   };
 
-  const handleGalleryImageChange = (index, file) => {
-    const newGallery = [...(product.productGallery || [])];
-    const updatedGalleryPreviews = [...galleryPreviews];
+  const handleGalleryFilesChange = (files) => {
+    const updatedGallery = [...(product.gallery_images || [])];
+    const previews = [...galleryPreviews];
 
-    if (file) {
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        newGallery[index] = reader.result;
-        updatedGalleryPreviews[index] = reader.result;
+        updatedGallery.push(reader.result);
+        previews.push(reader.result);
         setProduct((prev) => ({
           ...prev,
-          productGallery: newGallery,
+          productGallery: updatedGallery,
         }));
-        setGalleryPreviews(updatedGalleryPreviews);
+        setGalleryPreviews(previews);
       };
       reader.readAsDataURL(file);
-    }
+    });
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove) => {
+    const updatedGallery = [...(product.productGallery || [])];
+    const updatedPreviews = [...galleryPreviews];
+
+    updatedGallery.splice(indexToRemove, 1);
+    updatedPreviews.splice(indexToRemove, 1);
+
+    setProduct((prev) => ({
+      ...prev,
+      productGallery: updatedGallery,
+    }));
+    setGalleryPreviews(updatedPreviews);
   };
 
   const handleUpdateProduct = async () => {
     try {
-      await dispatch(updateProduct({ id: productId, updatedProduct: product })).unwrap();
+      await dispatch(
+        updateProduct({ id: productId, updatedProduct: product })
+      ).unwrap();
       alert("Product updated successfully!");
     } catch (err) {
       console.error("Update failed", err);
@@ -77,7 +94,9 @@ const EditProduct = ({ productId, onBack }) => {
   }
 
   if (!product) {
-    return <div className="text-center py-10 text-red-600">Product not found.</div>;
+    return (
+      <div className="text-center py-10 text-red-600">Product not found.</div>
+    );
   }
 
   return (
@@ -162,71 +181,77 @@ const EditProduct = ({ productId, onBack }) => {
           </tr>
 
           <tr className="border-t">
-  <td className="p-2 font-semibold align-top">Product Image</td>
-  <td className="p-2">
-    {product.image_url ? (
-      <Image
-        src={product.image_url}
-        alt="Main"
-        width={125}
-        height={125}
-        className="rounded border mb-2"
-      />
-    ) : (
-      <div className="mb-2 text-gray-500">No image</div>
-    )}
-
-    {/* Upload and Replace Image */}
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setProduct((prev) => ({
-              ...prev,
-              image_url: reader.result, // set Base64 string
-            }));
-          };
-          reader.readAsDataURL(file);
-        }
-      }}
-      className="mb-2"
-    />
-  </td>
-</tr>
-
+            <td className="p-2 font-semibold align-top">Product Image</td>
+            <td className="p-2">
+              {product.image_url ? (
+                <Image
+                  src={product.image_url}
+                  alt="Main"
+                  width={125}
+                  height={125}
+                  className="rounded border mb-2"
+                />
+              ) : (
+                <div className="mb-2 text-gray-500">No image</div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setProduct((prev) => ({
+                        ...prev,
+                        image_url: reader.result,
+                      }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="mb-2"
+              />
+            </td>
+          </tr>
 
           <tr className="border-t">
             <td className="p-2 font-semibold align-top">Gallery Images</td>
             <td className="p-2">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex flex-col items-start gap-2">
-                    {galleryPreviews[i] ? (
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files.length > 0) {
+                    handleGalleryFilesChange(files);
+                  }
+                }}
+                className="mb-4"
+              />
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {galleryPreviews.map((img, i) =>
+                  img ? (
+                    <div key={i} className="relative w-[100px] h-[100px]">
                       <Image
-                        src={galleryPreviews[i]}
+                        src={img}
                         alt={`Gallery ${i + 1}`}
                         width={100}
                         height={100}
-                        className="border rounded"
+                        className="object-cover rounded border"
                       />
-                    ) : (
-                      <div className="w-[100px] h-[100px] border rounded flex items-center justify-center text-gray-400 text-sm">
-                        No Image
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        handleGalleryImageChange(i, e.target.files?.[0])
-                      }
-                    />
-                  </div>
-                ))}
+                      <button
+                        onClick={() => handleRemoveGalleryImage(i)}
+                        className="absolute top-[-8px] right-[-8px] bg-white-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-green-200"
+                        title="Remove Image"
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  ) : null
+                )}
               </div>
             </td>
           </tr>
