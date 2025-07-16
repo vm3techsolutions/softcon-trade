@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProduct } from "@/app/store/productsSlice";
 import { fetchProductById } from "@/app/store/productByIdSlice";
-import { fetchProductById } from "@/app/store/productByIdSlice";
 import { fetchCategories } from "@/app/store/categorySlice";
 
 const EditProduct = ({ productId, onBack }) => {
@@ -232,7 +231,7 @@ const EditProduct = ({ productId, onBack }) => {
                   <div key={i} className="flex flex-col items-start gap-2">
                     {galleryPreviews[i] ? (
                       <Image
-                        src={img}
+                        src={galleryPreviews[i]}
                         alt={`Gallery ${i + 1}`}
                         width={100}
                         height={100}
