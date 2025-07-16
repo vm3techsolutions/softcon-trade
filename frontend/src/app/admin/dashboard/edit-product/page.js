@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProduct } from "@/app/store/productsSlice";
 import { fetchProductById } from "@/app/store/productByIdSlice";
+import { fetchProductById } from "@/app/store/productByIdSlice";
 import { fetchCategories } from "@/app/store/categorySlice";
 
 const EditProduct = ({ productId, onBack }) => {
@@ -38,9 +39,7 @@ const EditProduct = ({ productId, onBack }) => {
       }
     };
 
-    if (productId) {
-      loadProduct();
-    }
+    if (productId) loadProduct();
   }, [productId, dispatch]);
 
   const handleChange = (e) => {
@@ -108,7 +107,9 @@ const EditProduct = ({ productId, onBack }) => {
   }
 
   if (!product) {
-    return <div className="text-center py-10 text-red-600">Product not found.</div>;
+    return (
+      <div className="text-center py-10 text-red-600">Product not found.</div>
+    );
   }
 
   return (
@@ -231,11 +232,11 @@ const EditProduct = ({ productId, onBack }) => {
                   <div key={i} className="flex flex-col items-start gap-2">
                     {galleryPreviews[i] ? (
                       <Image
-                        src={galleryPreviews[i]}
+                        src={img}
                         alt={`Gallery ${i + 1}`}
                         width={100}
                         height={100}
-                        className="border rounded"
+                        className="object-cover rounded border"
                       />
                     ) : (
                       <div className="w-[100px] h-[100px] border rounded flex items-center justify-center text-gray-400 text-sm">
