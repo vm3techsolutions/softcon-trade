@@ -6,6 +6,7 @@ import Sidebar from '@/Component/AdminSidebar';
 import AddProductForm from './add-product/page';
 import AdminDashboard from './AdminDashboard';
 import ProductList from './product-list/page';
+import AllUserList from './all-user/page';
 
 const Page = () => {
   const router = useRouter();
@@ -33,7 +34,7 @@ const Page = () => {
       case 'orders':
         return <div>Orders Component</div>;
       case 'users':
-        return <div>Users Component</div>;
+        return <AllUserList />;
       default:
         return <p className="text-red-600">Invalid tab selected.</p>;
     }

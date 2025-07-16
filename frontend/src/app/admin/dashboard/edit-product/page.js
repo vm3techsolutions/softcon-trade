@@ -3,14 +3,15 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProduct } from "@/app/store/productsSlice";
-import {fetchProductById} from "@/app/store/productByIdSlice";
+import { fetchProductById } from "@/app/store/productByIdSlice";
 import { fetchCategories } from "@/app/store/categorySlice";
 
 const EditProduct = ({ productId, onBack }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
-  const [galleryPreviews, setGalleryPreviews] = useState(Array(5).fill(null));
+  const [galleryPreviews, setGalleryPreviews] = useState(Array(9).fill(null));
+  const [galleryFiles, setGalleryFiles] = useState(Array(9).fill(null));
 
   const { data: categories, loading: categoriesLoading } = useSelector(
     (state) => state.categories
@@ -21,8 +22,15 @@ const EditProduct = ({ productId, onBack }) => {
       try {
         await dispatch(fetchCategories()).unwrap();
         const result = await dispatch(fetchProductById(productId)).unwrap();
+
         setProduct(result);
-        setGalleryPreviews(result.productGallery || Array(5).fill(null));
+
+        // Use up to 9 gallery images
+        const previews = Array(9).fill(null);
+        result.gallery_images?.forEach((img, idx) => {
+          if (idx < 9) previews[idx] = img;
+        });
+        setGalleryPreviews(previews);
       } catch (error) {
         console.error("Failed to fetch product", error);
       } finally {
@@ -44,27 +52,50 @@ const EditProduct = ({ productId, onBack }) => {
   };
 
   const handleGalleryImageChange = (index, file) => {
-    const newGallery = [...(product.productGallery || [])];
-    const updatedGalleryPreviews = [...galleryPreviews];
+    const updatedFiles = [...galleryFiles];
+    const updatedPreviews = [...galleryPreviews];
 
     if (file) {
+      updatedFiles[index] = file;
       const reader = new FileReader();
       reader.onloadend = () => {
-        newGallery[index] = reader.result;
-        updatedGalleryPreviews[index] = reader.result;
-        setProduct((prev) => ({
-          ...prev,
-          productGallery: newGallery,
-        }));
-        setGalleryPreviews(updatedGalleryPreviews);
+        updatedPreviews[index] = reader.result;
+        setGalleryPreviews(updatedPreviews);
       };
       reader.readAsDataURL(file);
     }
+
+    setGalleryFiles(updatedFiles);
   };
 
   const handleUpdateProduct = async () => {
     try {
-      await dispatch(updateProduct({ id: productId, updatedProduct: product })).unwrap();
+      const formData = new FormData();
+      formData.append("name", product.name || "");
+      formData.append("description", product.description || "");
+      formData.append("price", product.price || "");
+      formData.append("stock", product.stock || "");
+      formData.append("category_id", product.category_id || "");
+
+      // Append existing image URL if no new file is selected
+      if (product.image_url && !product.image_url.startsWith("data:")) {
+        formData.append("image_url", product.image_url);
+      }
+
+      // Main image
+      const mainImageInput = document.querySelector("#main-image");
+      if (mainImageInput?.files?.[0]) {
+        formData.append("mainImage", mainImageInput.files[0]);
+      }
+
+      // Gallery images (up to 9)
+      galleryFiles.forEach((file, index) => {
+        if (file) {
+          formData.append(`galleryImages[${index}]`, file);
+        }
+      });
+
+      await dispatch(updateProduct({ id: productId, formData })).unwrap();
       alert("Product updated successfully!");
     } catch (err) {
       console.error("Update failed", err);
@@ -92,6 +123,7 @@ const EditProduct = ({ productId, onBack }) => {
 
       <table className="table-auto w-full text-left border">
         <tbody>
+          {/* Name */}
           <tr className="border-t">
             <td className="p-2 font-semibold">Name</td>
             <td className="p-2">
@@ -105,6 +137,7 @@ const EditProduct = ({ productId, onBack }) => {
             </td>
           </tr>
 
+          {/* Description */}
           <tr className="border-t">
             <td className="p-2 font-semibold">Description</td>
             <td className="p-2">
@@ -117,6 +150,7 @@ const EditProduct = ({ productId, onBack }) => {
             </td>
           </tr>
 
+          {/* Price */}
           <tr className="border-t">
             <td className="p-2 font-semibold">Price</td>
             <td className="p-2">
@@ -130,6 +164,7 @@ const EditProduct = ({ productId, onBack }) => {
             </td>
           </tr>
 
+          {/* Stock */}
           <tr className="border-t">
             <td className="p-2 font-semibold">Stock</td>
             <td className="p-2">
@@ -143,17 +178,19 @@ const EditProduct = ({ productId, onBack }) => {
             </td>
           </tr>
 
+          {/* Category */}
           <tr className="border-t">
             <td className="p-2 font-semibold">Category</td>
             <td className="p-2">
               <select
-                name="category"
-                value={product.category || ""}
+                name="category_id"
+                value={product.category_id || ""}
                 onChange={handleChange}
                 className="w-full border p-2 rounded"
               >
+                {/* <option value="">Select category</option> */}
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.name}>
+                  <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
                 ))}
@@ -161,49 +198,36 @@ const EditProduct = ({ productId, onBack }) => {
             </td>
           </tr>
 
+          {/* Main Image */}
           <tr className="border-t">
-  <td className="p-2 font-semibold align-top">Product Image</td>
-  <td className="p-2">
-    {product.image_url ? (
-      <Image
-        src={product.image_url}
-        alt="Main"
-        width={125}
-        height={125}
-        className="rounded border mb-2"
-      />
-    ) : (
-      <div className="mb-2 text-gray-500">No image</div>
-    )}
+            <td className="p-2 font-semibold align-top">Product Image</td>
+            <td className="p-2">
+              {product.image_url ? (
+                <Image
+                  src={product.image_url}
+                  alt="Main"
+                  width={125}
+                  height={125}
+                  className="rounded border mb-2"
+                />
+              ) : (
+                <div className="mb-2 text-gray-500">No image</div>
+              )}
+              <input
+                type="file"
+                id="main-image"
+                accept="image/*"
+                className="mb-2"
+              />
+            </td>
+          </tr>
 
-    {/* Upload and Replace Image */}
-    <input
-      type="file"
-      accept="image/*"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setProduct((prev) => ({
-              ...prev,
-              image_url: reader.result, // set Base64 string
-            }));
-          };
-          reader.readAsDataURL(file);
-        }
-      }}
-      className="mb-2"
-    />
-  </td>
-</tr>
-
-
+          {/* Gallery Images */}
           <tr className="border-t">
             <td className="p-2 font-semibold align-top">Gallery Images</td>
             <td className="p-2">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(9)].map((_, i) => (
                   <div key={i} className="flex flex-col items-start gap-2">
                     {galleryPreviews[i] ? (
                       <Image
@@ -221,6 +245,8 @@ const EditProduct = ({ productId, onBack }) => {
                     <input
                       type="file"
                       accept="image/*"
+                      className="gallery-input"
+                      name={`galleryImages[${i}]`}
                       onChange={(e) =>
                         handleGalleryImageChange(i, e.target.files?.[0])
                       }

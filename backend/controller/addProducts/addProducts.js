@@ -223,9 +223,9 @@ const addProduct = (req, res) => {
 
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const files = req.files || [];
-  const file = files.length > 0 ? files[0] : null;
-  const additionalImages = files.slice(1);
+  const mainImageFile = req.files?.mainImage?.[0] || null;
+  const galleryFilesMap = req.files || {};
+  const galleryImageKeys = Object.keys(galleryFilesMap).filter((key) => key.startsWith("galleryImages["));
 
   const {
     name,
@@ -272,12 +272,11 @@ const updateProduct = async (req, res) => {
       const category = await resolveCategory();
       const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
 
-      // Upload main image if new one is sent
-      if (file) {
+      // ✅ Upload main image only if provided
+      if (mainImageFile) {
         try {
-          finalImageUrl = await uploadToS3(file, categorySlug);
+          finalImageUrl = await uploadToS3(mainImageFile, categorySlug);
         } catch (uploadErr) {
-          console.error("Main image upload failed:", uploadErr);
           return res.status(500).json({ error: "Main image upload failed" });
         }
       }
@@ -286,15 +285,12 @@ const updateProduct = async (req, res) => {
         text.toString().toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
       const slug = slugify(updatedName);
 
-      // Update product
+      // Update product table
       db.query(
         `UPDATE products SET name=?, slug=?, description=?, price=?, stock=?, image_url=?, category=? WHERE id=?`,
         [updatedName, slug, updatedDescription, updatedPrice, updatedStock, finalImageUrl, category, id],
         (err) => {
-          if (err) {
-            console.error("Product update failed:", err);
-            return res.status(500).json({ error: "Failed to update product" });
-          }
+          if (err) return res.status(500).json({ error: "Failed to update product" });
 
           // Update product_categories if category_id/subcategory_id was provided
           if (category_id || subcategory_id) {
@@ -323,23 +319,44 @@ const updateProduct = async (req, res) => {
             });
           }
 
-          // Add additional images if any
-          if (additionalImages.length > 0) {
-            additionalImages.forEach(async (img) => {
+          // ✅ Handle gallery image upload separately
+          const existingImagesQuery = "SELECT id FROM product_images WHERE product_id = ? ORDER BY id ASC";
+          db.query(existingImagesQuery, [id], async (err, existingImages) => {
+            if (err) {
+              console.error("Fetch existing gallery error", err);
+              return res.status(500).json({ error: "Fetch gallery error" });
+            }
+
+            for (let key of galleryImageKeys) {
+              const index = parseInt(key.match(/\[(\d+)\]/)[1]);
+              const file = galleryFilesMap[key][0];
               try {
-                const imageUrl = await uploadToS3(img, categorySlug);
-                db.query(
-                  "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-                  [id, imageUrl],
-                  (err) => {
-                    if (err) console.error("Insert extra image failed:", err);
-                  }
-                );
+                const imageUrl = await uploadToS3(file, categorySlug);
+
+                if (existingImages[index]) {
+                  // Update existing image
+                  db.query(
+                    "UPDATE product_images SET image_url = ? WHERE id = ?",
+                    [imageUrl, existingImages[index].id],
+                    (err) => {
+                      if (err) console.error("Update gallery failed:", err);
+                    }
+                  );
+                } else {
+                  // Insert new image
+                  db.query(
+                    "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+                    [id, imageUrl],
+                    (err) => {
+                      if (err) console.error("Insert gallery failed:", err);
+                    }
+                  );
+                }
               } catch (err) {
-                console.error("Additional image upload failed:", err);
+                console.error("Gallery image upload failed:", err);
               }
-            });
-          }
+            }
+          });
 
           return res.json({ success: true, message: "Product updated!" });
         }
@@ -349,7 +366,6 @@ const updateProduct = async (req, res) => {
     }
   });
 };
-
 
 // Remove Product
 const removeProduct = (req, res) => {

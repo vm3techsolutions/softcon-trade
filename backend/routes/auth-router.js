@@ -14,6 +14,7 @@ const { getProductById } = require('../controller/getProduct/getProductById');
 const wiishListController = require('../controller/wishList/wishlistController');
 const cartController = require('../controller/cart/cartController');
 const orderController = require('../controller/order/orderController');
+const {getAllUsers} = require('../controller/userGetData/getAllUsers');
 
 // Define routes for user registration and login
 router.post('/user/signup', userRegister.userSignUp);
@@ -34,7 +35,21 @@ router.get('/admin/getData/:id', verifyToken, adminRegister.getAdminData);
 router.post("/admin/addProduct", verifyToken ,upload.array("image", 10), addProductsController.addProduct);
 
 // Update product (PUT): /api/products/:id
-router.put("/products/:id", verifyToken, upload.array("image", 10), addProductsController.updateProduct);
+// router.put("/products/:id", verifyToken, upload.array("image", 10), addProductsController.updateProduct);
+router.put("/products/:id", verifyToken,
+   upload.fields([
+  { name: "mainImage", maxCount: 1 },
+  { name: "galleryImages[0]", maxCount: 1 },
+  { name: "galleryImages[1]", maxCount: 1 },
+  { name: "galleryImages[2]", maxCount: 1 },
+  { name: "galleryImages[3]", maxCount: 1 },
+  { name: "galleryImages[4]", maxCount: 1 },
+  { name: "galleryImages[5]", maxCount: 1 },
+  { name: "galleryImages[6]", maxCount: 1 },
+  { name: "galleryImages[7]", maxCount: 1 },
+  { name: "galleryImages[8]", maxCount: 1 }
+]),
+  addProductsController.updateProduct);
 
 // Remove product (DELETE): /api/products/:id
 router.delete("/products/:id",verifyToken, addProductsController.removeProduct);
@@ -66,6 +81,12 @@ router.post("/cart/merge", cartController.mergeCart);
 router.post("/orders", verifyToken, orderController.createOrder);
 router.get("/orders/user/:user_id", verifyToken, orderController.getOrdersByUser);
 router.get("/orders/:order_id", verifyToken, orderController.getOrderDetails);
+
+// User routes
+// Get all users
+router.get("/users",verifyToken, getAllUsers);
+// router.delete("/users/:id", AllUsers.deleteUser);
+
 
 
 module.exports = router;

@@ -7,6 +7,7 @@ import cartReducer from "./cartSlice";
 import wishlistReducer from "./wishlistSlice";
 import fetchProductById from "./productByIdSlice";
 import productsSlice from './productsSlice';
+import usersSlice from './usersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     wishlist: wishlistReducer,
     productById: fetchProductById,
     allProducts: productsSlice,
+    allUsers: usersSlice,
   },
 });
